@@ -1,8 +1,11 @@
 # uw-course-enrollment
  
-```
-npm install express
-npm install axios
-npm install cheerio
-npm install create-react-app
-```
+Still under development
+
+Node libraries:
+- express.js
+- axios
+- cheerio
+
+React libraries:
+- recharts
