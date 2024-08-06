@@ -13,10 +13,9 @@ app.listen(port, () => {
 })
 
 const staticData = require('./data.json');
-const subjects = staticData.subjects;// ['MATH', 'AFM', 'CS'];
+const subjects = staticData.subjects;
+//['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
-const daysOfWeekFullName = staticData.daysOfWeekFullName;
-const year = 2024;
 
 let apiObject = null;
 
@@ -41,7 +40,6 @@ function refreshAPI() {
                 
                 // course general info
                 if(element.children.length == 8) {
-                    // console.log($(element).text());
                     courses.push({
                         subject: $(element).children(':nth-child(1)').text().trim(),
                         code: parseInt($(element).children(':nth-child(2)').text()),
@@ -50,28 +48,28 @@ function refreshAPI() {
                         sections: []
                     });
                 } else {
-                    // course sections
+                    // get course sections
                     $(element).find('table > tbody > tr:not(:first-child)')
-                    .filter((idx, element) => element.children.length == 12)
+                    .each((idx, element) => {
+                        
+                    });
+
+                    $(element).find('table > tbody > tr:not(:first-child)')
                     .each((idx, element) => {
                         code = parseInt($(element).children(':first-child').text());
-                        // if(isNaN(code)) return;
 
-                        // console.log(`${$(element).text()}`);
-                        dateArr = $(element).children(':nth-child(11)').html().split('<br>');
-                        timeStr = dateArr[0];
-                        dateStr = dateArr[1] || '';
-                        console.log(`${timeStr}|${dateStr}\n`);
-                        // if(timeStr ==)
+                        dateArr = $(element).children(':nth-last-child(2)').html().split('<br>');
+                        timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
+                        dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
                         
                         let startTime = endTime = null;
                         let daysOfWeek = [];
                         if(timeStr != '') {
-                            startTime = new Date(1970, 0, 1, timeStr.slice(0,2), timeStr.slice(3,5));
-                            endTime = new Date(1970, 0, 1, timeStr.slice(6,8), timeStr.slice(9,11));
-                            if(startTime.getHours() < 8 || (startTime.getHours() == 8 && startTime.getMinutes() < 30)) {
-                                startTime.setHours(startTime.getHours()+12);
-                                endTime.setHours(endTime.getHours()+12);
+                            startTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(0,2), timeStr.slice(3,5)));
+                            endTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(6,8), timeStr.slice(9,11)));
+                            if(startTime.getUTCHours() < 8 || (startTime.getUTCHours() == 8 && startTime.getUTCMinutes() < 30)) {
+                                startTime.setUTCHours(startTime.getUTCHours()+12);
+                                endTime.setUTCHours(endTime.getUTCHours()+12);
                             }
 
                             // loop from monday to sunday, check for edge case 'T' and 'Th'
@@ -85,11 +83,12 @@ function refreshAPI() {
                         }
                         let startDate = endDate = null;
                         if(dateStr != '') {
-                            startDate = new Date(year, dateStr.slice(0,2)-1, dateStr.slice(3,5));
-                            endDate = new Date(year, dateStr.slice(6,8)-1, dateStr.slice(9,11));
+                            startDate = new Date(Date.UTC(0, dateStr.slice(0,2)-1, dateStr.slice(3,5)));
+                            endDate = new Date(Date.UTC(0, dateStr.slice(6,8)-1, dateStr.slice(9,11)));
                         }
 
                         if(!isNaN(code)) {
+                            console.assert(element.children.length == 12);
                             sections.push({
                                 code: code,
                                 subject: courses[courses.length-1].subject,
@@ -117,44 +116,7 @@ function refreshAPI() {
             });
         }
 
-        const chartData1 = [];
-        const chartData2 = [];
-        const currDate = new Date(year, 8, 11);
-        let currTime = new Date(1970, 0, 1, 8, 30);
-        // 30 min timeslots from 8:30am to 10pm
-        for(let i = 0; i < 27; i++) {
-            nextHours = currTime.getHours();
-            nextMinutes = currTime.getMinutes()+30;
-            if(nextMinutes >= 60) {
-                nextHours++;
-                nextMinutes -= 60;
-            }
-            let nextTime = new Date(1970, 0, 1, nextHours, nextMinutes);
-            timeFrameName = `${currTime.getHours()}:${currTime.getMinutes().toString().padStart(2,'0')}`;
-            let timeFrame1 = {name: timeFrameName};
-            let timeFrame2 = {name: timeFrameName};
-            for(let j = 0; j < daysOfWeekAbbrev.length; j++) {
-                let enrollCapSum = 0;
-                let enrollTotalSum = 0;
-                sections.forEach((section) => {
-                    section.times.forEach((time) => {
-                        if(time.startTime == null || time.endTime == null) return;
-                        if(Math.max(time.startTime, currTime) < Math.min(time.endTime, nextTime) &&
-                            time.daysOfWeek.includes(daysOfWeekAbbrev[j]) &&
-                            ((time.startDate == null && time.endDate == null) || (time.startDate <= currDate && currDate <= time.endDate))) {
-                            enrollTotalSum += section.enrollTotal;
-                            enrollCapSum += section.enrollCap;
-                        }
-                    })
-                });
-                timeFrame1[daysOfWeekFullName[j]] = enrollTotalSum;
-                timeFrame2[daysOfWeekFullName[j]] = (enrollCapSum == 0 ? 0 : enrollTotalSum/enrollCapSum);
-            }
-            chartData1.push(timeFrame1);
-            chartData2.push(timeFrame2);
-            currTime = nextTime;
-        }
-        apiObject = {courses: courses, sections: sections, chartData1: chartData1, chartData2: chartData2};
+        apiObject = {courses: courses, sections: sections};
     });
 }
 refreshAPI();
