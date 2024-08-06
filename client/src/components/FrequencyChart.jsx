@@ -5,9 +5,9 @@ const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 const daysOfWeekFullName = staticData.daysOfWeekFullName;
 
 export default function FrequencyChart(prop) {
+    const [chartData, setChartData] = React.useState([0]);
     
     // console.log(prop.sections);
-  
     return <div className="chart-container" >
         <ResponsiveContainer aspect={2}>
             <LineChart data={prop.sections.length == 0 ? [] : calculateChartData(prop.sections.filter((section) => 

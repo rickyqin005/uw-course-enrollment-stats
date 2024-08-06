@@ -34,9 +34,24 @@
 }
 
 .chart-container {
+  margin-top:30px;
   width: min(100vw, 1300px);
 }
 
+.chart-options {
+  display: flex;
+}
+
 .option-container {
+  display: flex;
   flex-direction: row;
+  justify-content: left;
+  margin-right: 20px;
+}
+
+.option-name {
+  display: flex;
+  align-items: center;
+  margin: 0px;
+  margin-right: 10px;
 }
