@@ -176,6 +176,27 @@
         "WS",
         "YC"
     ],
+    "courseComponents": [
+        "CLN",
+        "DIS",
+        "ENS",
+        "ESS",
+        "FLD",
+        "FLT",
+        "LAB",
+        "LEC",
+        "OLN",
+        "ORL",
+        "PRA",
+        "PRJ",
+        "RDG",
+        "SEM",
+        "STU",
+        "TST",
+        "TUT",
+        "WRK",
+        "WSP"
+    ],
     "daysOfWeekAbbrev": [
         "M",
         "T",
