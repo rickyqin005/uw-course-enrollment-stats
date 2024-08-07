@@ -1,16 +1,16 @@
 import Select from 'react-select';
 
-export default function ChartOption(prop) {
+export default function ChartOption({ name, options, onChange }) {
 
     return <div className="option-container">
-        <div className="option-name">{prop.name}</div>
+        <div className="option-name">{name}</div>
         <Select
         defaultValue={[]}
         isMulti
-        options={prop.options}
+        options={options}
         className="basic-multi-select"
         classNamePrefix="select"
-        onChange={prop.onChange}
+        onChange={onChange}
         />
     </div>
 }

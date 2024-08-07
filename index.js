@@ -1,12 +1,11 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
 const app = express();
 const port = 3000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-})
+app.use(bodyParser.json());
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);
@@ -19,11 +18,21 @@ const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 
 let apiObject = null;
 
-app.get("/api", (req, res) => {
-    res.json(apiObject);
+//<----------------------------------- ENDPOINTS --------------------------------------------------->
+
+// retrieves all course info
+app.get("/api/courses", (req, res) => {
+    res.json(apiObject.courses);
 });
 
-console.log("Hello world!");
+app.post("/api/sections", (req, res) => {
+    console.log(req.body);
+    res.json(apiObject.sections.filter((section) =>
+        (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
+        (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
+    ));
+});
+
 
 function refreshAPI() {
     const requests = subjects.map((subject) =>

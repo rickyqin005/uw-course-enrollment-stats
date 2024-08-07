@@ -4,16 +4,30 @@ const staticData = require('../data.json');
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 const daysOfWeekFullName = staticData.daysOfWeekFullName;
 
-export default function FrequencyChart(prop) {
-    const [chartData, setChartData] = React.useState([0]);
+export default function FrequencyChart({ subjectsSelected, componentsSelected }) {
+    const [chartData, setChartData] = React.useState([]);
+    React.useEffect(() => {
+        console.log(`${subjectsSelected}|${componentsSelected}`);
+        fetch("/api/sections", {
+            method: "POST",
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subjects: subjectsSelected,
+                components: componentsSelected
+            })
+        })
+        .then((res) => res.json())
+        .then((data) => setChartData(calculateChartData(data)));
+
+      }, [subjectsSelected, componentsSelected]);
     
-    // console.log(prop.sections);
     return <div className="chart-container" >
         <ResponsiveContainer aspect={2}>
-            <LineChart data={prop.sections.length == 0 ? [] : calculateChartData(prop.sections.filter((section) => 
-                (prop.subjectsSelected.length == 0 || prop.subjectsSelected.includes(section.subject)) &&
-                (prop.componentsSelected.length == 0 || prop.componentsSelected.includes(section.component.split(' ')[0]))
-                ))}
+            <LineChart data={chartData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -68,6 +82,5 @@ function calculateChartData(data) {
         chartData.push(timeFrame);
         currTime = nextTime;
     }
-    // console.log(chartData);
     return chartData;
 }
