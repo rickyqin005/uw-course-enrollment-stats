@@ -29,9 +29,9 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected })
         <ResponsiveContainer aspect={2}>
             <LineChart data={chartData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="2" />
+                <XAxis label={{ value: "Time", position: "insideBottomRight", offset: -15}} dataKey="name" />
+                <YAxis label={{ value: "# of Students", angle: -90, position: "insideLeft"}} />
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="Monday" stroke="blue" />

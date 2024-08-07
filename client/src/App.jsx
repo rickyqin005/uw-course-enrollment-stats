@@ -12,6 +12,7 @@ function App() {
   return (
     <div className="App">
       <div className="App-body">
+        <h1>UW Course Enrollment Stats</h1>
         <div className="chart-options">
           <ChartOption
             name="Subject:"
