@@ -31,7 +31,7 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected })
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="2" />
                 <XAxis label={{ value: "Time", position: "insideBottomRight", offset: -15}} dataKey="name" />
-                <YAxis label={{ value: "# of Students", angle: -90, position: "insideLeft"}} />
+                <YAxis label={{ value: "# of Students", angle: -90, position: "insideLeft"}} tickCount={7} />
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="Monday" stroke="blue" />
