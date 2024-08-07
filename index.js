@@ -20,7 +20,6 @@ let apiObject = null;
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
-// retrieves all course info
 app.get("/api/courses", (req, res) => {
     res.json(apiObject.courses);
 });
@@ -32,6 +31,8 @@ app.post("/api/sections", (req, res) => {
         (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
     ));
 });
+
+//<------------------------------------------------------------------------------------------------->
 
 
 function refreshAPI() {
@@ -58,10 +59,6 @@ function refreshAPI() {
                     });
                 } else {
                     // get course sections
-                    $(element).find('table > tbody > tr:not(:first-child)')
-                    .each((idx, element) => {
-                        
-                    });
 
                     $(element).find('table > tbody > tr:not(:first-child)')
                     .each((idx, element) => {
@@ -129,4 +126,4 @@ function refreshAPI() {
     });
 }
 refreshAPI();
-setInterval(refreshAPI, 600000);
+setInterval(refreshAPI, 60000);
