@@ -3,7 +3,8 @@
     "axios": "^1.7.3",
     "cheerio": "^1.0.0-rc.12",
     "create-react-app": "^5.0.1",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "vercel": "^35.2.3"
   },
   "scripts": {
     "start": "node index.js"
