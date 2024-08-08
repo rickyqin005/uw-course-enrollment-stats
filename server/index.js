@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 const axios = require('axios');
 const cheerio = require("cheerio");
 const app = express();
@@ -79,12 +78,17 @@ function refreshAPI() {
 
                         $(element).find('table > tbody > tr:not(:first-child)')
                         .each((idx, element) => {
-                            code = parseInt($(element).children(':first-child').text());
+                            let code = parseInt($(element).children(':first-child').text());
+                            let dateArr = $(element).children(':nth-last-child(2)').html();
 
-                            dateArr = $(element).children(':nth-last-child(2)').html().split('<br>');
-                            timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
-                            dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
-                            
+                            // skip cancelled sections
+                            if(dateArr[0] == 'Cancelled Section') {
+                                sections.pop(); return;
+                            }
+                            dateArr = dateArr.split('<br>');
+                            let timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
+                            let dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
+
                             let startTime = endTime = null;
                             let daysOfWeek = [];
                             if(timeStr != '') {
@@ -142,11 +146,11 @@ function refreshAPI() {
             apiObject.courses = courses;
             apiObject.sections = sections;
             console.log('refreshed data');
-            setTimeout(refreshAPI, 60000);
+            setTimeout(refreshAPI, 120000);
         });
     } catch(error) {
         console.log(error);
-        setTimeout(refreshAPI, 60000);
+        setTimeout(refreshAPI, 120000);
     }
 }
 refreshAPI();
