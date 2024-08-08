@@ -25,7 +25,10 @@ const subjects = staticData.subjects;
 //['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 
-let apiObject = null;
+let apiObject = {
+    courses: [],
+    sections: []
+};
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
@@ -136,11 +139,14 @@ function refreshAPI() {
                 });
             }
 
-            apiObject = {courses: courses, sections: sections};
+            apiObject.courses = courses;
+            apiObject.sections = sections;
+            console.log('refreshed data');
+            setTimeout(refreshAPI, 60000);
         });
     } catch(error) {
         console.log(error);
+        setTimeout(refreshAPI, 60000);
     }
 }
 refreshAPI();
-setInterval(refreshAPI, 60000);
