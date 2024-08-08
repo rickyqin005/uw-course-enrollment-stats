@@ -78,14 +78,14 @@ function refreshAPI() {
 
                         $(element).find('table > tbody > tr:not(:first-child)')
                         .each((idx, element) => {
-                            let code = parseInt($(element).children(':first-child').text());
-                            let dateArr = $(element).children(':nth-last-child(2)').html();
 
                             // skip cancelled sections
-                            if(dateArr[0] == 'Cancelled Section') {
+                            if($(element).children(':last-child').text() == 'Cancelled Section') {
                                 sections.pop(); return;
                             }
-                            dateArr = dateArr.split('<br>');
+
+                            let code = parseInt($(element).children(':first-child').text());
+                            let dateArr = $(element).children(':nth-last-child(2)').html().split('<br>');
                             let timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
                             let dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
 
