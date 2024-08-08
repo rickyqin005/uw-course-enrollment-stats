@@ -8,7 +8,7 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected })
     const [chartData, setChartData] = React.useState([]);
     React.useEffect(() => {
         console.log(`${subjectsSelected}|${componentsSelected}`);
-        fetch("/api/sections", {
+        fetch(`${process.env.REACT_APP_SERVER_URL}/api/sections`, {
             method: "POST",
             mode: 'cors',
             headers: {

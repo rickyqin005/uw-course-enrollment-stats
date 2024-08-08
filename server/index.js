@@ -26,6 +26,7 @@ app.get("/api/courses", (req, res) => {
 
 app.post("/api/sections", (req, res) => {
     console.log(req.body);
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(apiObject.sections.filter((section) =>
         (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
         (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
