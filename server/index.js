@@ -1,11 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const axios = require('axios');
 const cheerio = require("cheerio");
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);
@@ -20,13 +28,16 @@ let apiObject = null;
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
-app.get("/api/courses", (req, res) => {
+app.get('/api/courses', (req, res) => {
     res.json(apiObject.courses);
 });
 
-app.post("/api/sections", (req, res) => {
+app.get('/api/sections', (req, res) => {
+    res.json(apiObject.sections);
+});
+
+app.post('/api/sections', (req, res) => {
     console.log(req.body);
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(apiObject.sections.filter((section) =>
         (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
         (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
