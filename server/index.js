@@ -4,19 +4,9 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
 const pg = require('pg');
-const format = require('pg-format');
 
 const app = express();
 const port = 3000;
-const pgClient = new pg.Client({
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    host: process.env.PGHOST,
-    port: process.env.PGPORT,
-    ssl: {
-        rejectUnauthorized: false,
-    }
-});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,11 +25,6 @@ const staticData = require('./data.json');
 const subjects = staticData.subjects;
 //['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
-
-let apiObject = {
-    courses: [],
-    sections: []
-};
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
@@ -61,14 +46,16 @@ app.post('/api/sections', (req, res) => {
 
 //<------------------------------------------------------------------------------------------------->
 
-// refresh info every 10 minutes
+// refresh info every 15 minutes
 async function refreshAPI() {
     try {
         const requests = subjects.map((subject) =>
             axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}`));
         const webpages = await Promise.all(requests);
+        console.log('fetched data');
         const courses = [];
         const sections = [];
+        const timeslots = [];
         for(let i = 0; i < webpages.length; i++) {
             const $ = cheerio.load(webpages[i].data);
 
@@ -78,13 +65,13 @@ async function refreshAPI() {
                 
                 // course general info
                 if(element.children.length == 8) {
-                    courses.push({
-                        subject: $(element).children(':nth-child(1)').text().trim(),
-                        code: parseInt($(element).children(':nth-child(2)').text()),
-                        units: Number($(element).children(':nth-child(3)').text()),
-                        title: $(element).children(':nth-child(4)').text().trim(),
-                        sections: []
-                    });
+                    courses.push([
+                        courses.length+1,// course_id
+                        $(element).children(':nth-child(1)').text().trim(),// subject
+                        $(element).children(':nth-child(2)').text().trim(),// code
+                        Number($(element).children(':nth-child(3)').text()),// units
+                        $(element).children(':nth-child(4)').text().trim(),// title
+                    ]);
                 } else {
                     // course sections
                     $(element).find('table > tbody > tr:not(:first-child)')
@@ -101,7 +88,7 @@ async function refreshAPI() {
                         let dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
 
                         let startTime = endTime = null;
-                        let daysOfWeek = [];
+                        let daysOfWeek = 0;
                         if(timeStr != '') {
                             startTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(0,2), timeStr.slice(3,5)));
                             endTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(6,8), timeStr.slice(9,11)));
@@ -111,10 +98,10 @@ async function refreshAPI() {
                             }
 
                             // loop from monday to sunday, check for edge case 'T' and 'Th'
-                            for(let j = 11, k = 0; k < daysOfWeekAbbrev.length && j < timeStr.length; k++) {
+                            for(let j = 11, k = 0, pow = 1; k < daysOfWeekAbbrev.length && j < timeStr.length; k++, pow *= 2) {
                                 if(timeStr.slice(j,j+daysOfWeekAbbrev[k].length) == daysOfWeekAbbrev[k] && 
                                     (daysOfWeekAbbrev[k] != 'T' || !(j+1 < timeStr.length && timeStr.charAt(j+1) == 'h'))) {
-                                    daysOfWeek.push(daysOfWeekAbbrev[k]);
+                                    daysOfWeek += pow;
                                     j += daysOfWeekAbbrev[k].length;
                                 }
                             }
@@ -127,45 +114,77 @@ async function refreshAPI() {
 
                         if(!isNaN(code)) {
                             console.assert(element.children.length == 12);
-                            sections.push({
-                                code: code,
-                                subject: courses[courses.length-1].subject,
-                                courseCode: courses[courses.length-1].code,
-                                component: $(element).children(':nth-child(2)').text().trim(),
-                                location: $(element).children(':nth-child(3)').text().trim().replace(/[\s]+/, ' '),
-                                times: [],
-                                enrollCap: parseInt($(element).children(':nth-child(7)').text()) || 0,
-                                enrollTotal: parseInt($(element).children(':nth-child(8)').text()) || 0
-                            });
-                            courses[courses.length-1].sections.push(code);
+                            sections.push([
+                                code,                                                                       // section_id
+                                courses[courses.length-1][0],                                               // course_id
+                                $(element).children(':nth-child(2)').text().trim(),                         // component
+                                $(element).children(':nth-child(3)').text().trim().replace(/[\s]+/, ' '),   // location
+                                parseInt($(element).children(':nth-child(7)').text()) || 0,                 // enroll_cap
+                                parseInt($(element).children(':nth-child(8)').text()) || 0                  // enroll_total
+                            ]);
                         }
                         
                         if(timeStr != '') {
-                            sections[sections.length-1].times.push({
-                                startTime: startTime,
-                                endTime: endTime,
-                                daysOfWeek: daysOfWeek,
-                                startDate: startDate,
-                                endDate: endDate
-                            });
+                            timeslots.push([
+                                sections[sections.length-1][0],// section_id
+                                startTime,// start_time
+                                endTime,// end_time
+                                daysOfWeek,// days_of_week
+                                startDate,// start_date
+                                endDate// end_date
+                            ]);
                         }
                     });
                 }
             });
         }
+        console.log('processed data');
 
+        const sql =
+            'DELETE FROM timeslots;\n' +
+            'DELETE FROM sections;\n' +
+            'DELETE FROM courses;\n' +
+            `INSERT INTO courses VALUES ${arrsFormat(courses)};\n` +
+            `INSERT INTO sections VALUES ${arrsFormat(sections)};\n`+
+            `INSERT INTO timeslots VALUES ${arrsFormat(timeslots)};`;
+
+        const fs = require('fs');
+        const path = require('path');
+        fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, (err) => {});
+
+        const pgClient = new pg.Client({
+            user: process.env.PGUSER,
+            password: process.env.PGPASSWORD,
+            host: process.env.PGHOST,
+            port: process.env.PGPORT,
+            ssl: {
+                rejectUnauthorized: false,
+            }
+        });
         await pgClient.connect();
-        const res = await pgClient.query('SELECT * FROM courses');
-        console.log(res);
+        await pgClient.query(sql);
         await pgClient.end();
-            
-        apiObject.courses = courses;
-        apiObject.sections = sections;
-        console.log('refreshed data');
-        setTimeout(refreshAPI, 600000);
+        console.log('updated db');
+        
+        setTimeout(refreshAPI, 900000);
     } catch(error) {
         console.log(error);
-        setTimeout(refreshAPI, 600000);
+        setTimeout(refreshAPI, 900000);
     }
 }
 refreshAPI();
+
+function arrsFormat(arrs) {
+    return arrs.map(arr =>
+        `(${arr.map(element => {
+            if(element == null || element == undefined) return 'NULL';
+            if(typeof element === 'string' || element instanceof String) return `'${element.replace('\'', '\'\'')}'`;
+            if(element instanceof Date) {
+                // differentiate between DATE and TIME
+                if(element.getUTCFullYear() == 1900) return `'${element.toISOString()}'`;
+                return `'${element.toISOString().slice(11)}'`;
+            }
+            return element.toString().replace('\'', '\'\'');
+        }).join(', ')})`
+    ).join(',\n');
+}
