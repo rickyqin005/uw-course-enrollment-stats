@@ -1,9 +1,32 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
+const pg = require('pg');
+const fs = require('fs');
+const path = require("path");
+
 const app = express();
 const port = 3000;
+const pgClient = new pg.Client({
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    host: process.env.PGHOST,
+    port: process.env.PGPORT,
+    ssl: {
+        require: true,
+        rejectUnauthorized: true,
+        ca: fs.readFileSync(path.resolve(__dirname, './pathto/rds-ca-cert.pem')).toString()
+    }
+});
+pgClient.connect()
+.then(async () => {
+    const res = await pgClient.query('SELECT NOW()');
+    console.log(`connected to DB at ${res.rows[0].now}`);
+    await pgClient.end();
+});
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -13,7 +36,6 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
-
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);
@@ -53,7 +75,7 @@ app.post('/api/sections', (req, res) => {
 function refreshAPI() {
     try {
         const requests = subjects.map((subject) =>
-            axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}&cournum=%3F`));
+            axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}`));
         Promise.all(requests).then((webpages) => {
             const courses = [];
             const sections = [];
@@ -74,8 +96,7 @@ function refreshAPI() {
                             sections: []
                         });
                     } else {
-                        // get course sections
-
+                        // course sections
                         $(element).find('table > tbody > tr:not(:first-child)')
                         .each((idx, element) => {
 
