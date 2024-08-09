@@ -28,12 +28,26 @@ const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
-app.get('/api/courses', (req, res) => {
-    res.json(apiObject.courses);
+app.get('/api/courses', async (req, res) => {
+    const pgClient = new pg.Client({
+        user: process.env.PGUSER,
+        password: process.env.PGPASSWORD,
+        host: process.env.PGHOST,
+        port: process.env.PGPORT,
+        ssl: {
+            rejectUnauthorized: false,
+        }
+    });
+    await pgClient.connect();
+    const dbRes = await pgClient.query('SELECT * FROM courses');
+    console.log(dbRes);
+    res.json(dbRes.rows);
+    await pgClient.end();
 });
 
 app.get('/api/sections', (req, res) => {
     res.json(apiObject.sections);
+    
 });
 
 app.post('/api/sections', (req, res) => {
@@ -42,6 +56,18 @@ app.post('/api/sections', (req, res) => {
         (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
         (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
     ));
+    // const pgClient = new pg.Client({
+        //     user: process.env.PGUSER,
+        //     password: process.env.PGPASSWORD,
+        //     host: process.env.PGHOST,
+        //     port: process.env.PGPORT,
+        //     ssl: {
+        //         rejectUnauthorized: false,
+        //     }
+        // });
+        // await pgClient.connect();
+        // await pgClient.query(sql);
+        // await pgClient.end();
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -94,6 +120,9 @@ async function refreshAPI() {
                             endTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(6,8), timeStr.slice(9,11)));
                             if(startTime.getUTCHours() < 8 || (startTime.getUTCHours() == 8 && startTime.getUTCMinutes() < 30)) {
                                 startTime.setUTCHours(startTime.getUTCHours()+12);
+                                endTime.setUTCHours(endTime.getUTCHours()+12);
+                            }
+                            if(startTime.getUTCHours()*60+startTime.getUTCMinutes() >= endTime.getUTCHours()*60+endTime.getUTCMinutes()) {
                                 endTime.setUTCHours(endTime.getUTCHours()+12);
                             }
 
@@ -165,7 +194,7 @@ async function refreshAPI() {
         await pgClient.query(sql);
         await pgClient.end();
         console.log('updated db');
-        
+
         setTimeout(refreshAPI, 900000);
     } catch(error) {
         console.log(error);
@@ -179,11 +208,7 @@ function arrsFormat(arrs) {
         `(${arr.map(element => {
             if(element == null || element == undefined) return 'NULL';
             if(typeof element === 'string' || element instanceof String) return `'${element.replace('\'', '\'\'')}'`;
-            if(element instanceof Date) {
-                // differentiate between DATE and TIME
-                if(element.getUTCFullYear() == 1900) return `'${element.toISOString()}'`;
-                return `'${element.toISOString().slice(11)}'`;
-            }
+            if(element instanceof Date) return `'${element.toISOString()}'`;
             return element.toString().replace('\'', '\'\'');
         }).join(', ')})`
     ).join(',\n');
