@@ -4,8 +4,6 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
 const pg = require('pg');
-const fs = require('fs');
-const path = require("path");
 
 const app = express();
 const port = 3000;
@@ -15,9 +13,7 @@ const pgClient = new pg.Client({
     host: process.env.PGHOST,
     port: process.env.PGPORT,
     ssl: {
-        require: true,
-        rejectUnauthorized: true,
-        ca: fs.readFileSync(path.resolve(__dirname, './pathto/rds-ca-cert.pem')).toString()
+        rejectUnauthorized: false,
     }
 });
 pgClient.connect()
