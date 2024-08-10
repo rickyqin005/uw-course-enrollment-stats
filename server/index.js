@@ -3,7 +3,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
+
 const pg = require('pg');
+const pgClient = new pg.Client({
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    host: process.env.PGHOST,
+    port: process.env.PGPORT,
+    ssl: {
+        rejectUnauthorized: false,
+    }
+});
+pgClient.connect();
 
 const app = express();
 const port = 3000;
@@ -29,45 +40,39 @@ const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
 app.get('/api/courses', async (req, res) => {
-    const pgClient = new pg.Client({
-        user: process.env.PGUSER,
-        password: process.env.PGPASSWORD,
-        host: process.env.PGHOST,
-        port: process.env.PGPORT,
-        ssl: {
-            rejectUnauthorized: false,
-        }
-    });
-    await pgClient.connect();
     const dbRes = await pgClient.query('SELECT * FROM courses');
     console.log(dbRes);
     res.json(dbRes.rows);
-    await pgClient.end();
 });
 
-app.get('/api/sections', (req, res) => {
-    res.json(apiObject.sections);
-    
+app.get('/api/sections', async (req, res) => {
+    const dbRes = await pgClient.query('SELECT * FROM sections');
+    console.log(dbRes);
+    res.json(dbRes.rows);
 });
 
-app.post('/api/sections', (req, res) => {
-    console.log(req.body);
-    res.json(apiObject.sections.filter((section) =>
+app.get('/api/chart1/', async (req, res) => {
+    const dbRes = await pgClient.query(`SELECT times, day_of_week, (
+        SELECT SUM(enroll_total)
+        FROM timeslots
+        INNER JOIN sections
+        ON timeslots.section_id = sections.section_id
+        WHERE GREATEST(start_time, times) < LEAST(times + INTERVAL '30 min', end_time)
+            AND days_of_week & day_of_week = day_of_week
+    )
+    FROM generate_series(TIMESTAMP '1899-12-31 08:30', TIMESTAMP '1899-12-31 21:30', INTERVAL '30 min') AS f1(times)
+    CROSS JOIN (VALUES (1),(2),(4),(8),(16)) f2(day_of_week)`);
+    console.log(dbRes);
+    res.json(dbRes.rows);
+});
+
+app.post('/api/sections', async (req, res) => {
+    const dbRes = await pgClient.query('SELECT * FROM sections');
+    console.log(dbRes);
+    res.json(dbRes.rows.filter((section) =>
         (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
         (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
     ));
-    // const pgClient = new pg.Client({
-        //     user: process.env.PGUSER,
-        //     password: process.env.PGPASSWORD,
-        //     host: process.env.PGHOST,
-        //     port: process.env.PGPORT,
-        //     ssl: {
-        //         rejectUnauthorized: false,
-        //     }
-        // });
-        // await pgClient.connect();
-        // await pgClient.query(sql);
-        // await pgClient.end();
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -181,18 +186,7 @@ async function refreshAPI() {
         const path = require('path');
         fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, (err) => {});
 
-        const pgClient = new pg.Client({
-            user: process.env.PGUSER,
-            password: process.env.PGPASSWORD,
-            host: process.env.PGHOST,
-            port: process.env.PGPORT,
-            ssl: {
-                rejectUnauthorized: false,
-            }
-        });
-        await pgClient.connect();
         await pgClient.query(sql);
-        await pgClient.end();
         console.log('updated db');
 
         setTimeout(refreshAPI, 900000);
