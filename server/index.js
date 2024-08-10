@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require("cheerio");
+const fs = require('fs');
+const path = require('path');
 
 const pg = require('pg');
 const pgClient = new pg.Client({
@@ -40,39 +42,25 @@ const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
 app.get('/api/courses', async (req, res) => {
-    const dbRes = await pgClient.query('SELECT * FROM courses');
-    console.log(dbRes);
+    const dbRes = await pgClient.query(formatSQL('./postgres/api/courses.sql'));
     res.json(dbRes.rows);
 });
 
 app.get('/api/sections', async (req, res) => {
-    const dbRes = await pgClient.query('SELECT * FROM sections');
-    console.log(dbRes);
+    const dbRes = await pgClient.query(formatSQL('./postgres/api/sections.sql'));
     res.json(dbRes.rows);
 });
 
 app.get('/api/chart1/', async (req, res) => {
-    const dbRes = await pgClient.query(`SELECT times, day_of_week, (
-        SELECT SUM(enroll_total)
-        FROM timeslots
-        INNER JOIN sections
-        ON timeslots.section_id = sections.section_id
-        WHERE GREATEST(start_time, times) < LEAST(times + INTERVAL '30 min', end_time)
-            AND days_of_week & day_of_week = day_of_week
-    )
-    FROM generate_series(TIMESTAMP '1899-12-31 08:30', TIMESTAMP '1899-12-31 21:30', INTERVAL '30 min') AS f1(times)
-    CROSS JOIN (VALUES (1),(2),(4),(8),(16)) f2(day_of_week)`);
-    console.log(dbRes);
-    res.json(dbRes.rows);
+    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql','',''));
+    res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
 });
 
-app.post('/api/sections', async (req, res) => {
-    const dbRes = await pgClient.query('SELECT * FROM sections');
-    console.log(dbRes);
-    res.json(dbRes.rows.filter((section) =>
-        (req.body.subjects == undefined || req.body.subjects.length == 0 || req.body.subjects.includes(section.subject)) &&
-        (req.body.components == undefined || req.body.components.length == 0 || req.body.components.includes(section.component.split(' ')[0]))
-    ));
+app.post('/api/chart1/', async (req, res) => {
+    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
+        (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
+        (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : ''));
+    res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -174,18 +162,8 @@ async function refreshAPI() {
         }
         console.log('processed data');
 
-        const sql =
-            'DELETE FROM timeslots;\n' +
-            'DELETE FROM sections;\n' +
-            'DELETE FROM courses;\n' +
-            `INSERT INTO courses VALUES ${arrsFormat(courses)};\n` +
-            `INSERT INTO sections VALUES ${arrsFormat(sections)};\n`+
-            `INSERT INTO timeslots VALUES ${arrsFormat(timeslots)};`;
-
-        const fs = require('fs');
-        const path = require('path');
+        const sql = formatSQL('./postgres/refresh.sql',arrsFormat(courses), arrsFormat(sections), arrsFormat(timeslots));
         fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, (err) => {});
-
         await pgClient.query(sql);
         console.log('updated db');
 
@@ -206,4 +184,11 @@ function arrsFormat(arrs) {
             return element.toString().replace('\'', '\'\'');
         }).join(', ')})`
     ).join(',\n');
+}
+
+function formatSQL(path, ...args) {
+    let sql = fs.readFileSync(path, { encoding: 'utf8' });
+    args.forEach(arg => sql = sql.replace('%SQL', arg));
+    console.log(sql);
+    return sql;
 }

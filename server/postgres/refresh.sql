@@ -1,0 +1,6 @@
+DELETE FROM timeslots;
+DELETE FROM sections;
+DELETE FROM courses;
+INSERT INTO courses VALUES %SQL;
+INSERT INTO sections VALUES %SQL;
+INSERT INTO timeslots VALUES %SQL;

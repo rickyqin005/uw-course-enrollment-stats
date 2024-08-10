@@ -9,18 +9,25 @@
 
 .App-body {
   background-color: #ffffff;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(12px + 0.5vmin);
+  font-size: calc(12px + 0.20vmin + 0.20vmax);
   color: rgb(0, 0, 0);
 }
 
 .chart-container {
   margin-top:30px;
   width: min(100vw, 1300px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-loading {
+  position: absolute;
+  font-size: 28px;
 }
 
 .chart-options {

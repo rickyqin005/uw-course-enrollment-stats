@@ -1,5 +1,4 @@
--- code to setup the db structure
--- should only be run once
+-- code to setup the db structure, should only be run once
 
 DROP TABLE timeslots;
 DROP TABLE sections;
@@ -25,9 +24,11 @@ CREATE TABLE sections (
 CREATE TABLE timeslots (
     section_id      INT         NOT NULL REFERENCES sections(section_id),
     start_time      TIMESTAMP   CHECK(TIMESTAMP '1899-12-31 08:30' <= start_time),
-    end_time        TIMESTAMP   CHECK(end_time <= TIMESTAMP '1899-12-31 22:00' AND start_time < end_time),
+    end_time        TIMESTAMP   CHECK(end_time <= TIMESTAMP '1899-12-31 22:00' AND start_time < end_time AND
+                                    ((start_time IS NOT NULL AND end_time IS NOT NULL) OR (start_time IS NULL AND end_time IS NULL))),
     -- encodes which days of the week a timeslot runs as bits: 1 Mon, 2 Tue, 4 Wed, 8 Thu, ...
     days_of_week    INT         NOT NULL CHECK(days_of_week BETWEEN 0 AND 127),
     start_date      DATE,
-    end_date        DATE        CHECK(start_date <= end_date)
+    end_date        DATE        CHECK(start_date <= end_date AND
+                                    ((start_date IS NOT NULL AND end_date IS NOT NULL) OR (start_date IS NULL AND end_date IS NULL)))
 );
