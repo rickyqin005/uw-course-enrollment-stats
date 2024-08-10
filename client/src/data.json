@@ -214,5 +214,23 @@
         "Friday",
         "Saturday",
         "Sunday"
-    ]
+    ],
+    "monthsShortName": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+    ],
+    "firstWeek": "1900-09-02T00:00:00.000Z",
+    "lastWeek": "1900-12-16T00:00:00.000Z",
+    "defaultWeek": "1900-09-09T00:00:00.000Z",
+    "defaultWeekIndex": 1
 }

@@ -34,7 +34,7 @@ app.listen(port, () => {
     console.log(`App listening on port ${port}`);
 })
 
-const staticData = require('./data.json');
+const staticData = require('../data.json');
 const subjects = staticData.subjects;
 //['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
@@ -52,15 +52,18 @@ app.get('/api/sections', async (req, res) => {
 });
 
 app.get('/api/chart1/', async (req, res) => {
-    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql','',''));
+    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql','','',`'${staticData.defaultWeek.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
 });
 
 app.post('/api/chart1/', async (req, res) => {
+    try {
     const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
         (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
-        (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : ''));
+        (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
+        `'${req.body.week.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
+    } catch(error) {console.log(error)};
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -188,7 +191,7 @@ function arrsFormat(arrs) {
 
 function formatSQL(path, ...args) {
     let sql = fs.readFileSync(path, { encoding: 'utf8' });
-    args.forEach(arg => sql = sql.replace('%SQL', arg));
+    args.forEach((arg, idx) => sql = sql.replaceAll('%SQL'+(idx+1), arg));
     console.log(sql);
     return sql;
 }

@@ -1,33 +1,35 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 
-export default function FrequencyChart({ subjectsSelected, componentsSelected }) {
+export default function FrequencyChart({ subjectsSelected, componentsSelected, weekSelected }) {
     const [chartData, setChartData] = React.useState([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {
-        console.log(`${subjectsSelected}|${componentsSelected}`);
-        setChartDataLoading(true);
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
-            method: "POST",
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                subjects: subjectsSelected,
-                components: componentsSelected
+        console.log(`options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);
+        try {
+            setChartDataLoading(true);
+            fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
+                method: "POST",
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subjects: subjectsSelected,
+                    components: componentsSelected,
+                    week: weekSelected
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-            setChartData(data);
-            setChartDataLoading(false);
-        })
-        .catch((error) => console.log(error));
-
-      }, [subjectsSelected, componentsSelected]);
+            .then(res => res.json())
+            .then(data => {
+                setChartData(data);
+                setChartDataLoading(false);
+            })
+        } catch(error) {
+            console.log(error);
+        }
+      }, [subjectsSelected, componentsSelected, weekSelected]);
     
     return <div className="chart-container" >
         {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
