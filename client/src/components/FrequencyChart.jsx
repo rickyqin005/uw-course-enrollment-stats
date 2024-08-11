@@ -6,29 +6,26 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected, w
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {
         console.log(`options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);
-        try {
-            setChartDataLoading(true);
-            fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
-                method: "POST",
-                mode: 'cors',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    subjects: subjectsSelected,
-                    components: componentsSelected,
-                    week: weekSelected
-                })
+        setChartDataLoading(true);
+        fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
+            method: "POST",
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subjects: subjectsSelected,
+                components: componentsSelected,
+                week: weekSelected
             })
-            .then(res => res.json())
-            .then(data => {
-                setChartData(data);
-                setChartDataLoading(false);
-            })
-        } catch(error) {
-            console.log(error);
-        }
+        })
+        .then(res => res.json())
+        .then(data => {
+            setChartData(data);
+            setChartDataLoading(false);
+        })
+        .catch(error => console.log(error));
       }, [subjectsSelected, componentsSelected, weekSelected]);
     
     return <div className="chart-container" >

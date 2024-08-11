@@ -34,7 +34,7 @@ app.listen(port, () => {
     console.log(`App listening on port ${port}`);
 })
 
-const staticData = require('../data.json');
+const staticData = require('./data.json');
 const subjects = staticData.subjects;
 //['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
@@ -64,6 +64,13 @@ app.post('/api/chart1/', async (req, res) => {
         `'${req.body.week.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
     } catch(error) {console.log(error)};
+});
+
+app.get('/api/chart2/', async (req, res) => {
+    try {
+        const dbRes = await pgClient.query(formatSQL('./postgres/api/chart2.sql'));
+        res.json(dbRes.rows);
+    } catch(error) {console.log(error);}
 });
 
 //<------------------------------------------------------------------------------------------------->
