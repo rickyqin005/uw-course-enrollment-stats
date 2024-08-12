@@ -23,30 +23,33 @@ function App() {
     <div className="App">
       <div className="App-body">
         <h1>UW Course Enrollment Stats</h1>
-        <div className="chart-options">
-          <ChartOption
-            name="Subject:"
-            options={staticData.subjects.map(subject => { return { value: subject, label: subject }})}
-            isMultiSelect={true}
-            defaultValue={[]}
-            onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>
-          <ChartOption
-            name="Component:"
-            options={staticData.courseComponents.map(component => { return { value: component, label: component }})}
-            isMultiSelect={true}
-            defaultValue={[]}
-            onChange={components => setChartComponentsSelected(components.map(component => component.value))}/>
-          <ChartOption
-            name="Week of:"
-            options={weeksList}
-            isMultiSelect={false}
-            defaultValue={weeksList[1]}
-            onChange={week => setChartWeekSelected(week.value)}/>
+        <div className="chart-region">
+          <h2>When do people usually have classes?</h2>
+          <div className="chart-options">
+            <ChartOption
+              name="Subject:"
+              options={staticData.subjects.map(subject => { return { value: subject, label: subject }})}
+              isMultiSelect={true}
+              defaultValue={[]}
+              onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>
+            <ChartOption
+              name="Component:"
+              options={staticData.courseComponents.map(component => { return { value: component, label: component }})}
+              isMultiSelect={true}
+              defaultValue={[]}
+              onChange={components => setChartComponentsSelected(components.map(component => component.value))}/>
+            <ChartOption
+              name="Week of:"
+              options={weeksList}
+              isMultiSelect={false}
+              defaultValue={weeksList[1]}
+              onChange={week => setChartWeekSelected(week.value)}/>
+          </div>
+          <FrequencyChart
+            subjectsSelected={chartSubjectsSelected}
+            componentsSelected={chartComponentsSelected}
+            weekSelected={chartWeekSelected}/>
         </div>
-        <FrequencyChart
-          subjectsSelected={chartSubjectsSelected}
-          componentsSelected={chartComponentsSelected}
-          weekSelected={chartWeekSelected}/>
       </div>
     </div>
   );

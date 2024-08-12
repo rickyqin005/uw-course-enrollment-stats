@@ -36,27 +36,32 @@ app.listen(port, () => {
 
 const staticData = require('./data.json');
 const subjects = staticData.subjects;
-//['AE', 'BE', 'BME', 'CHE', 'ECE', 'ENVE', 'GEOE', 'ME', 'MGMT', 'MSE', 'MTE', 'NE', 'SE', 'SYDE', 'TRON']
 const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
-app.get('/api/courses', async (req, res) => {
-    const dbRes = await pgClient.query(formatSQL('./postgres/api/courses.sql'));
-    res.json(dbRes.rows);
+[
+    { path: '/api/courses' },
+    { path: '/api/sections' },
+    { path: '/api/subjects' },
+    {
+        path: '/api/chart1',
+        sqlParams: ['','',`'${staticData.defaultWeek.slice(0,10)}'`],
+        callback: rows => rows.map(row => row.time_frame)
+    },
+    { path: '/api/chart2' }
+].forEach(route => {
+    try {
+        app.get(route.path, async (req, res) => {
+            const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...(route.sqlParams ?? [])));
+            res.json((route.callback ?? (rows => rows))(dbRes.rows));
+        });
+    } catch (error) {
+        console.log(error);
+    }
 });
 
-app.get('/api/sections', async (req, res) => {
-    const dbRes = await pgClient.query(formatSQL('./postgres/api/sections.sql'));
-    res.json(dbRes.rows);
-});
-
-app.get('/api/chart1/', async (req, res) => {
-    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql','','',`'${staticData.defaultWeek.slice(0,10)}'`));
-    res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
-});
-
-app.post('/api/chart1/', async (req, res) => {
+app.post('/api/chart1', async (req, res) => {
     try {
     const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
         (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
@@ -64,13 +69,6 @@ app.post('/api/chart1/', async (req, res) => {
         `'${req.body.week.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
     } catch(error) {console.log(error)};
-});
-
-app.get('/api/chart2/', async (req, res) => {
-    try {
-        const dbRes = await pgClient.query(formatSQL('./postgres/api/chart2.sql'));
-        res.json(dbRes.rows);
-    } catch(error) {console.log(error);}
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -199,6 +197,5 @@ function arrsFormat(arrs) {
 function formatSQL(path, ...args) {
     let sql = fs.readFileSync(path, { encoding: 'utf8' });
     args.forEach((arg, idx) => sql = sql.replaceAll('%SQL'+(idx+1), arg));
-    console.log(sql);
     return sql;
 }
