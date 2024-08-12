@@ -2,11 +2,16 @@ SELECT
 	json_object('name': to_char(times, 'hh:MI'))::jsonb ||
 	json_object_agg(day_of_week, COALESCE((
 		SELECT SUM(enroll_total)
-	    FROM timeslots
-		INNER JOIN sections
-		ON sections.section_id = timeslots.section_id
-		INNER JOIN courses
-		ON courses.course_id = sections.course_id
+	    FROM sections
+		CROSS JOIN LATERAL(
+			SELECT enroll_total
+			FROM enrollment
+			WHERE enrollment.section_id = sections.section_id
+			ORDER BY check_time DESC
+			LIMIT 1
+		)
+		INNER JOIN timeslots
+		ON timeslots.section_id = sections.section_id
 		WHERE
 			(start_time IS NULL OR
 				GREATEST(start_time, times) < LEAST(times + '30 min'::interval, end_time))

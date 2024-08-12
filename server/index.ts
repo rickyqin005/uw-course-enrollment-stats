@@ -44,6 +44,7 @@ const daysOfWeekAbbrev: string[] = staticData.daysOfWeekAbbrev;
     { path: '/api/courses' },
     { path: '/api/sections' },
     { path: '/api/subjects' },
+    { path: '/api/changes' },
     {
         path: '/api/chart1',
         sqlParams: ['','',`'${staticData.defaultWeek.slice(0,10)}'`],
@@ -64,7 +65,7 @@ const daysOfWeekAbbrev: string[] = staticData.daysOfWeekAbbrev;
 app.post('/api/chart1', async (req, res) => {
     try {
     const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
-        (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
+        (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
         (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
         `'${req.body.week.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
@@ -83,6 +84,7 @@ async function refreshAPI() {
         
         const courses: any[][] = [];
         const sections: any[][] = [];
+        const enrollment: any[][] = [];
         const timeslots: any[][] = [];
         for(let i = 0; i < webpages.length; i++) {
             const $ = cheerio.load(webpages[i].data);
@@ -94,11 +96,10 @@ async function refreshAPI() {
                 // course general info
                 if(element.children.length == 8) {
                     courses.push([
-                        courses.length+1,// course_id
                         $(element).children(':nth-child(1)').text().trim(),// subject
                         $(element).children(':nth-child(2)').text().trim(),// code
                         Number($(element).children(':nth-child(3)').text()),// units
-                        $(element).children(':nth-child(4)').text().trim(),// title
+                        $(element).children(':nth-child(4)').text().trim()// title
                     ]);
                 } else {
                     // course sections
@@ -107,6 +108,7 @@ async function refreshAPI() {
 
                         // skip cancelled sections
                         if($(element).children(':last-child').text() == 'Cancelled Section') {
+                            enrollment.pop();
                             sections.pop(); return;
                         }
 
@@ -145,15 +147,21 @@ async function refreshAPI() {
                             endDate = new Date(Date.UTC(0, parseInt(dateStr.slice(6,8))-1, parseInt(dateStr.slice(9,11))));
                         }
 
+                        const currDate = new Date(Date.now());
                         if(!isNaN(code)) {
                             console.assert(element.children.length == 12);
+                            enrollment.push([
+                                code,                                                                       // section_id
+                                currDate.toISOString(),                                         // check_time
+                                parseInt($(element).children(':nth-child(8)').text()) || 0                  // enroll_total
+                            ])
                             sections.push([
                                 code,                                                                       // section_id
-                                courses[courses.length-1][0],                                               // course_id
+                                courses[courses.length-1][0],                                               // course_subject
+                                courses[courses.length-1][1],                                               // course_code
                                 $(element).children(':nth-child(2)').text().trim(),                         // component
                                 $(element).children(':nth-child(3)').text().trim().replace(/[\s]+/, ' '),   // location
                                 parseInt($(element).children(':nth-child(7)').text()) || 0,                 // enroll_cap
-                                parseInt($(element).children(':nth-child(8)').text()) || 0                  // enroll_total
                             ]);
                         }
                         
@@ -173,7 +181,8 @@ async function refreshAPI() {
         }
         console.log('processed data');
 
-        const sql = formatSQL('./postgres/refresh.sql',arrsFormat(courses), arrsFormat(sections), arrsFormat(timeslots));
+        const sql = formatSQL('./postgres/refresh.sql',
+            arrsFormat(courses), arrsFormat(sections), arrsFormat(enrollment), arrsFormat(timeslots));
         fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, (err) => {});
         await pgClient.query(sql);
         console.log('updated db');

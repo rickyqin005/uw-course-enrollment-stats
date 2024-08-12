@@ -1,6 +1,7 @@
 -- code to setup the db structure, should only be run once
 
 DROP TABLE timeslots;
+DROP TABLE enrollment;
 DROP TABLE sections;
 DROP TABLE courses;
 DROP TABLE subjects;
@@ -187,20 +188,28 @@ INSERT INTO subjects VALUES
 ('YC', NULL);
 
 CREATE TABLE courses (
-    course_id   INT             PRIMARY KEY,
     subject     VARCHAR(6)      NOT NULL REFERENCES subjects(subject),
     code        VARCHAR(5)      NOT NULL CHECK(code ~ '[0-9][A-Z]*'),
     units       REAL            NOT NULL CHECK(units BETWEEN 0 AND 3),
-    title       VARCHAR(255)    NOT NULL
+    title       VARCHAR(255)    NOT NULL,
+    PRIMARY KEY(subject, code)
 );
 
 CREATE TABLE sections (
     section_id      INT             PRIMARY KEY,
-    course_id       INT             NOT NULL REFERENCES courses(course_id),
+    course_subject  VARCHAR(6)      NOT NULL,
+    course_code     VARCHAR(5)      NOT NULL,
     component       CHAR(7)         NOT NULL CHECK(component ~ '[A-Z]{3} [0-9]{3}'),
     location        VARCHAR(20)     NOT NULL CHECK(location ~ '[A-Z]+ [A-Z]+'),
     enroll_cap      INT             NOT NULL CHECK(enroll_cap >= 1),
-    enroll_total    INT             NOT NULL CHECK(enroll_total >= 0)
+    FOREIGN KEY(course_subject, course_code) REFERENCES courses(subject, code)
+);
+
+CREATE TABLE enrollment (
+    section_id      INT         NOT NULL REFERENCES sections(section_id),
+    check_time      TIMESTAMP   NOT NULL,
+    enroll_total    INT         NOT NULL CHECK(enroll_total >= 0),
+    PRIMARY KEY(section_id, check_time)
 );
 	
 CREATE TABLE timeslots (

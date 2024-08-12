@@ -1,11 +1,4 @@
-SELECT
-    section_id,
-    subject,
-    code,
-    component,
-    location,
-    enroll_cap,
-    enroll_total,
+SELECT *,
     ARRAY(
 		SELECT json_object(
 			'start_time': start_time::timestamp with time zone,
@@ -18,5 +11,11 @@ SELECT
 		WHERE timeslots.section_id = sections.section_id
 	) AS times
 FROM sections
-INNER JOIN courses
-ON courses.course_id = sections.course_id
+CROSS JOIN LATERAL(
+	SELECT enroll_total
+	FROM enrollment
+	WHERE enrollment.section_id = sections.section_id
+	ORDER BY check_time DESC
+	LIMIT 1
+)
+ORDER BY course_subject, course_code, LEFT(component, 3) = 'TST', component;
