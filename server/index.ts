@@ -35,8 +35,8 @@ app.listen(port, () => {
 })
 
 const staticData = require('./data.json');
-const subjects = staticData.subjects;
-const daysOfWeekAbbrev = staticData.daysOfWeekAbbrev;
+const subjects: string[] = staticData.subjects;
+const daysOfWeekAbbrev: string[] = staticData.daysOfWeekAbbrev;
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
 
@@ -76,13 +76,14 @@ app.post('/api/chart1', async (req, res) => {
 // refresh info every 15 minutes
 async function refreshAPI() {
     try {
-        const requests = subjects.map((subject) =>
+        const requests: Promise<any>[] = subjects.map(subject =>
             axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}`));
         const webpages = await Promise.all(requests);
         console.log('fetched data');
-        const courses = [];
-        const sections = [];
-        const timeslots = [];
+        
+        const courses: any[] = [];
+        const sections: any[] = [];
+        const timeslots: any[] = [];
         for(let i = 0; i < webpages.length; i++) {
             const $ = cheerio.load(webpages[i].data);
 
@@ -110,15 +111,16 @@ async function refreshAPI() {
                         }
 
                         let code = parseInt($(element).children(':first-child').text());
-                        let dateArr = $(element).children(':nth-last-child(2)').html().split('<br>');
+                        let dateArr: string[] = $(element).children(':nth-last-child(2)').html().split('<br>');
                         let timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
                         let dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
 
-                        let startTime = endTime = null;
+                        let startTime: Date | null = null;
+                        let endTime: Date | null = null;
                         let daysOfWeek = 0;
                         if(timeStr != '') {
-                            startTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(0,2), timeStr.slice(3,5)));
-                            endTime = new Date(Date.UTC(0, 0, 0, timeStr.slice(6,8), timeStr.slice(9,11)));
+                            startTime = new Date(Date.UTC(0, 0, 0, parseInt(timeStr.slice(0,2)), parseInt(timeStr.slice(3,5))));
+                            endTime = new Date(Date.UTC(0, 0, 0, parseInt(timeStr.slice(6,8)), parseInt(timeStr.slice(9,11))));
                             if(startTime.getUTCHours() < 8 || (startTime.getUTCHours() == 8 && startTime.getUTCMinutes() < 30)) {
                                 startTime.setUTCHours(startTime.getUTCHours()+12);
                                 endTime.setUTCHours(endTime.getUTCHours()+12);
@@ -136,10 +138,11 @@ async function refreshAPI() {
                                 }
                             }
                         }
-                        let startDate = endDate = null;
+                        let startDate: Date | null = null;
+                        let endDate: Date | null = null;
                         if(dateStr != '') {
-                            startDate = new Date(Date.UTC(0, dateStr.slice(0,2)-1, dateStr.slice(3,5)));
-                            endDate = new Date(Date.UTC(0, dateStr.slice(6,8)-1, dateStr.slice(9,11)));
+                            startDate = new Date(Date.UTC(0, parseInt(dateStr.slice(0,2))-1, parseInt(dateStr.slice(3,5))));
+                            endDate = new Date(Date.UTC(0, parseInt(dateStr.slice(6,8))-1, parseInt(dateStr.slice(9,11))));
                         }
 
                         if(!isNaN(code)) {
@@ -183,7 +186,7 @@ async function refreshAPI() {
 }
 refreshAPI();
 
-function arrsFormat(arrs) {
+function arrsFormat(arrs: any[]) {
     return arrs.map(arr =>
         `(${arr.map(element => {
             if(element == null || element == undefined) return 'NULL';
@@ -194,8 +197,10 @@ function arrsFormat(arrs) {
     ).join(',\n');
 }
 
-function formatSQL(path, ...args) {
+function formatSQL(path: string, ...args: string[]): string {
     let sql = fs.readFileSync(path, { encoding: 'utf8' });
     args.forEach((arg, idx) => sql = sql.replaceAll('%SQL'+(idx+1), arg));
     return sql;
 }
+
+// https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html
