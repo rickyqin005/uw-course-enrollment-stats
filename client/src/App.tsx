@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.css";
-import FrequencyChart from "./components/FrequencyChart.jsx";
-import ChartOption from "./components/ChartOption.jsx";
+import FrequencyChart from "./components/FrequencyChart.tsx";
+import ChartOption from "./components/ChartOption.tsx";
 
 const staticData = require('./data.json');
 let currWeek = new Date(staticData.firstWeek);
-const weeksList = [];
+const weeksList: {value: string, label: string }[] = [];
 while(currWeek <= new Date(staticData.lastWeek)) {
   weeksList.push({
     value: currWeek.toISOString(),
@@ -15,9 +15,9 @@ while(currWeek <= new Date(staticData.lastWeek)) {
 }
 
 function App() {
-  const [chartSubjectsSelected, setChartSubjectsSelected] = React.useState([]);
-  const [chartComponentsSelected, setChartComponentsSelected] = React.useState([]);
-  const [chartWeekSelected, setChartWeekSelected] = React.useState(weeksList[1].value);
+  const [chartSubjectsSelected, setChartSubjectsSelected] = React.useState<string[]>([]);
+  const [chartComponentsSelected, setChartComponentsSelected] = React.useState<string[]>([]);
+  const [chartWeekSelected, setChartWeekSelected] = React.useState<string>(weeksList[1].value);
 
   return (
     <div className="App">

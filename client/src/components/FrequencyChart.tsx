@@ -1,8 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 
-export default function FrequencyChart({ subjectsSelected, componentsSelected, weekSelected }) {
-    const [chartData, setChartData] = React.useState([]);
+export default function FrequencyChart({ subjectsSelected, componentsSelected, weekSelected }:
+    { subjectsSelected: string[], componentsSelected: string[], weekSelected: string }) {
+    const [chartData, setChartData] = React.useState<any[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {
         console.log(`options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);

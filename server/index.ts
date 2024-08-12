@@ -81,9 +81,9 @@ async function refreshAPI() {
         const webpages = await Promise.all(requests);
         console.log('fetched data');
         
-        const courses: any[] = [];
-        const sections: any[] = [];
-        const timeslots: any[] = [];
+        const courses: any[][] = [];
+        const sections: any[][] = [];
+        const timeslots: any[][] = [];
         for(let i = 0; i < webpages.length; i++) {
             const $ = cheerio.load(webpages[i].data);
 
