@@ -207,7 +207,7 @@ CREATE TABLE sections (
 
 CREATE TABLE enrollment (
     section_id      INT         NOT NULL REFERENCES sections(section_id),
-    check_time      TIMESTAMP   NOT NULL,
+    check_time      TIMESTAMP   NOT NULL CHECK(extract(min FROM check_time) = 0 AND extract(sec FROM check_time) = 0),
     enroll_total    INT         NOT NULL CHECK(enroll_total >= 0),
     PRIMARY KEY(section_id, check_time)
 );

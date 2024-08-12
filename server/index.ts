@@ -31,7 +31,7 @@ app.use(function(req, res, next) {
 });
 
 app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
+    log(`App listening on port ${port}`);
 })
 
 const staticData = require('./data.json');
@@ -58,7 +58,7 @@ const daysOfWeekAbbrev: string[] = staticData.daysOfWeekAbbrev;
             res.json((route.callback ?? (rows => rows))(dbRes.rows));
         });
     } catch (error) {
-        console.log(error);
+        log(error);
     }
 });
 
@@ -69,7 +69,7 @@ app.post('/api/chart1', async (req, res) => {
         (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
         `'${req.body.week.slice(0,10)}'`));
     res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
-    } catch(error) {console.log(error)};
+    } catch(error) {log(error)};
 });
 
 //<------------------------------------------------------------------------------------------------->
@@ -80,7 +80,7 @@ async function refreshAPI() {
         const requests: Promise<any>[] = subjects.map(subject =>
             axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}`));
         const webpages = await Promise.all(requests);
-        console.log('fetched data');
+        log('fetched data');
         
         const courses: any[][] = [];
         const sections: any[][] = [];
@@ -148,11 +148,14 @@ async function refreshAPI() {
                         }
 
                         const currDate = new Date(Date.now());
+                        currDate.setUTCMinutes(0);
+                        currDate.setUTCSeconds(0);
+                        currDate.setUTCMilliseconds(0);
                         if(!isNaN(code)) {
                             console.assert(element.children.length == 12);
                             enrollment.push([
                                 code,                                                                       // section_id
-                                currDate.toISOString(),                                         // check_time
+                                currDate.toISOString(),                                                     // check_time
                                 parseInt($(element).children(':nth-child(8)').text()) || 0                  // enroll_total
                             ])
                             sections.push([
@@ -179,23 +182,23 @@ async function refreshAPI() {
                 }
             });
         }
-        console.log('processed data');
+        log('processed data');
 
         const sql = formatSQL('./postgres/refresh.sql',
             arrsFormat(courses), arrsFormat(sections), arrsFormat(enrollment), arrsFormat(timeslots));
-        fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, (err) => {});
+        fs.writeFile(path.resolve(__dirname, "./sql.sql"), sql, () => {});
         await pgClient.query(sql);
-        console.log('updated db');
+        log('updated db');
 
         setTimeout(refreshAPI, 900000);
     } catch(error) {
-        console.log(error);
+        log(error);
         setTimeout(refreshAPI, 900000);
     }
 }
 refreshAPI();
 
-function arrsFormat(arrs: any[]) {
+function arrsFormat(arrs: any[]): string {
     return arrs.map(arr =>
         `(${arr.map(element => {
             if(element == null || element == undefined) return 'NULL';
@@ -213,3 +216,8 @@ function formatSQL(path: string, ...args: string[]): string {
 }
 
 // https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html
+
+function log(val: any): void {
+    process.stdout.write(`[${new Date(Date.now()).toISOString()}] `);
+    console.log(val);
+}
