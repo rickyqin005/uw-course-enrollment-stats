@@ -63,6 +63,6 @@ refreshAPI();
 setInterval(() => {
     refreshAPI()
     .catch(error => log(error));
-}, 900000);
+}, 600000);
 
 // https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html

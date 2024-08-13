@@ -18,4 +18,5 @@ CROSS JOIN LATERAL(
 	LIMIT 1
 )
 WHERE latest_enroll_total != prev_enroll_total
-ORDER BY course_subject, course_code, component;
+ORDER BY ABS(latest_enroll_total - prev_enroll_total) DESC,
+	course_subject, course_code, LEFT(component, 3) = 'TST', component;
