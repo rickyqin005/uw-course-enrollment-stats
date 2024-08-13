@@ -1,9 +1,18 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 
+interface TimeFrame {
+    name: string,
+    Monday: number,
+    Tuesday: number,
+    Wednesday: number,
+    Thursday: number,
+    Friday: number
+}
+
 export default function FrequencyChart({ subjectsSelected, componentsSelected, weekSelected }:
     { subjectsSelected: string[], componentsSelected: string[], weekSelected: string }) {
-    const [chartData, setChartData] = React.useState<any[]>([]);
+    const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {
         console.log(`options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);
