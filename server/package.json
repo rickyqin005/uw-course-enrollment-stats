@@ -8,7 +8,7 @@
     "pg": "^8.12.0"
   },
   "scripts": {
-    "prestart": "npx tsc index.ts",
+    "prestart": "npx tsc",
     "start": "node index.js"
   },
   "devDependencies": {
