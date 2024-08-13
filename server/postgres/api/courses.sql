@@ -9,4 +9,4 @@ SELECT
         WHERE sections.course_subject = subject AND sections.course_code = code
     ) AS "sections"
 FROM courses
-ORDER BY subject, code
+ORDER BY subject, code;

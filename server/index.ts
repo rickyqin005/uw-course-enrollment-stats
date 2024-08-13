@@ -30,6 +30,7 @@ app.listen(port, () => {
     { path: '/api/courses' },
     { path: '/api/sections' },
     { path: '/api/subjects' },
+    { path: '/api/course_enrollment' },
     { path: '/api/changes' },
     {
         path: '/api/chart1',
@@ -37,24 +38,26 @@ app.listen(port, () => {
         callback: rows => rows.map(row => row.time_frame)
     }
 ].forEach(route => {
-    try {
-        app.get(route.path, async (req, res) => {
+    app.get(route.path, async (req, res) => {
+        try {
             const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...(route.sqlParams ?? [])));
             res.json((route.callback ?? (rows => rows))(dbRes.rows));
-        });
-    } catch (error) {
-        log(error);
-    }
+        } catch (error) {
+            log(error);
+        }
+    });
 });
 
 app.post('/api/chart1', async (req, res) => {
     try {
-    const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
-        (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
-        (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
-        `'${req.body.week.slice(0,10)}'`));
-    res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
-    } catch(error) {log(error)};
+        const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
+            (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
+            (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
+            `'${req.body.week.slice(0,10)}'`));
+        res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
+    } catch(error) {
+        log(error);
+    };
 });
 
 //<------------------------------------------------------------------------------------------------->

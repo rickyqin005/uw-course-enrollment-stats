@@ -22,4 +22,4 @@ SELECT
 	), 0))::jsonb AS time_frame
 FROM generate_series('1899-12-31 08:30'::timestamp, '1899-12-31 21:30'::timestamp, '30 min'::interval) AS f1(times)
 CROSS JOIN (VALUES (1, 'Monday'), (2, 'Tuesday'), (4, 'Wednesday'), (8, 'Thursday'), (16, 'Friday')) f2(pow, day_of_week)
-GROUP BY times
+GROUP BY times;
