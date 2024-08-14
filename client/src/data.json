@@ -177,14 +177,16 @@
         "YC"
     ],
     "courseComponents": [
+        "LEC",
+        "TUT",
+        "LAB",
+        "TST",
         "CLN",
         "DIS",
         "ENS",
         "ESS",
         "FLD",
         "FLT",
-        "LAB",
-        "LEC",
         "OLN",
         "ORL",
         "PRA",
@@ -192,8 +194,6 @@
         "RDG",
         "SEM",
         "STU",
-        "TST",
-        "TUT",
         "WRK",
         "WSP"
     ],
