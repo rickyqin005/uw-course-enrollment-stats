@@ -22,8 +22,8 @@ app.listen(port, () => {
 });
 
 const axios = require('axios');
-setInterval(() => {
-    axios.get(process.env.SERVER_PINGER_URL);
+setInterval(async () => {
+    await axios.get(process.env.SERVER_PINGER_URL);
     log(`pinged ${process.env.SERVER_PINGER_URL}`);
 }, 600000);
 
