@@ -12,6 +12,7 @@ interface TimeFrame {
 
 export default function FrequencyChart({ subjectsSelected, componentsSelected, weekSelected }:
     { subjectsSelected: string[], componentsSelected: string[], weekSelected: string }) {
+        
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {

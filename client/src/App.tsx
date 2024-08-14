@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import FrequencyChart from "./components/FrequencyChart.tsx";
 import ChartOption from "./components/ChartOption.tsx";
+import CoursesTable from "./components/CoursesTable.tsx";
 
 const staticData = require('./data.json');
 let currWeek = new Date(staticData.firstWeek);
@@ -50,6 +51,8 @@ function App() {
             componentsSelected={chartComponentsSelected}
             weekSelected={chartWeekSelected}/>
         </div>
+        <h2>Which courses are taken the most?</h2>
+        <CoursesTable />
       </div>
     </div>
   );
