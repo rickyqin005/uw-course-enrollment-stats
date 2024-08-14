@@ -1,7 +1,7 @@
 SELECT *
 FROM courses
 CROSS JOIN LATERAL(
-    SELECT SUM(enroll_total) as course_enroll_total
+    SELECT SUM(enroll_total)::integer as course_enroll_total
     FROM sections
     -- get latest enrollment number
     CROSS JOIN LATERAL(
@@ -17,4 +17,5 @@ CROSS JOIN LATERAL(
     ORDER BY course_enroll_total DESC
     LIMIT 1
 )
-ORDER BY subject, code;
+ORDER BY %SQL1
+%SQL2;

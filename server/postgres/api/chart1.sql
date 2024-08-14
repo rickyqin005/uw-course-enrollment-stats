@@ -1,5 +1,5 @@
 SELECT
-	json_object('name': to_char(times, 'hh:MI'))::jsonb ||
+	json_object('name': to_char(times, 'HH24:MI'))::jsonb ||
 	json_object_agg(day_of_week, COALESCE((
 		SELECT SUM(enroll_total)
 	    FROM sections

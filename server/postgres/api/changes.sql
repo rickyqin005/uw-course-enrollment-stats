@@ -8,7 +8,7 @@ CROSS JOIN LATERAL(
 	FROM enrollment
     WHERE enrollment.section_id = sections.section_id
 	ORDER BY check_time DESC
-	LIMIT 1 OFFSET 5
+	LIMIT 1 OFFSET 1
 )
 CROSS JOIN LATERAL(
     SELECT enroll_total AS latest_enroll_total
