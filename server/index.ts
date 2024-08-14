@@ -21,7 +21,18 @@ app.listen(port, () => {
     log(`App listening on port ${port}`);
 });
 
+const axios = require('axios');
+setInterval(() => {
+    axios.get(process.env.SERVER_PINGER_URL);
+    log(`pinged ${process.env.SERVER_PINGER_URL}`);
+}, 600000);
+
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
+
+app.get('/api/check', (req, res) => {
+    log(`GET ${req.path}`);
+    res.send('Hello');
+});
 
 [
     { path: '/api/courses' },
@@ -44,7 +55,7 @@ app.listen(port, () => {
         try {
             const pgClient = createPGClient();
             await pgClient.connect();
-            log('queried db');
+            log(`GET ${req.path}`);
             const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...(route.sqlParams ?? [])));
             res.json((route.callback ?? (rows => rows))(dbRes.rows));
             await pgClient.end();
@@ -58,7 +69,7 @@ app.post('/api/chart1', async (req, res) => {
     try {
         const pgClient = createPGClient();
         await pgClient.connect();
-        log('queried db');
+        log(`POST ${req.path}`);
         const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
             (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
             (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
@@ -74,7 +85,7 @@ app.post('/api/course_enrollment', async (req, res) => {
     try {
         const pgClient = createPGClient();
         await pgClient.connect();
-        log('queried db');
+        log(`POST ${req.path}`);
         const dbRes = await pgClient.query(formatSQL('./postgres/api/course_enrollment.sql',
             (req.body.order_by != undefined && req.body.order_by.length > 0) ?
                 `${req.body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code',
