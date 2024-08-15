@@ -23,8 +23,12 @@ app.listen(port, () => {
 
 const axios = require('axios');
 setInterval(async () => {
-    await axios.get(process.env.SERVER_PINGER_URL);
-    log(`pinged ${process.env.SERVER_PINGER_URL}`);
+    try {
+        await axios.get(process.env.SERVER_PINGER_URL);
+        log(`pinged ${process.env.SERVER_PINGER_URL}`);
+    } catch(error) {
+        console.log(error);
+    }
 }, 600000);
 
 //<----------------------------------- ENDPOINTS --------------------------------------------------->
@@ -62,56 +66,52 @@ app.get('/api/check', (req, res) => {
             const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...(route.sqlParams ?? [])));
             res.json((route.callback ?? (rows => rows))(dbRes.rows));
             await pgClient.end();
-        } catch (error) {
+        } catch(error) {
             log(error);
         }
     });
 });
 
-app.post('/api/chart1', async (req, res) => {
-    try {
-        const pgClient = createPGClient();
-        await pgClient.connect();
-        log(`POST ${req.path}`);
-        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
-            (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
-            (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
-            `'${req.body.week.slice(0,10)}'`));
-        res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
-        await pgClient.end();
-    } catch(error) {
-        log(error);
-    };
-});
 
-app.post('/api/chart2', async (req, res) => {
-    try {
-        const pgClient = createPGClient();
-        await pgClient.connect();
-        log(`POST ${req.path}`);
-        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
-            req.body.subject, req.body.code));
-        res.json(dbRes.rows);
-        await pgClient.end();
-    } catch(error) {
-        log(error);
-    };
-});
-
-app.post('/api/course_changes', async (req, res) => {
-    try {
-        const pgClient = createPGClient();
-        await pgClient.connect();
-        log(`POST ${req.path}`);
-        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
-            (req.body.order_by != undefined && req.body.order_by.length > 0) ?
-                `${req.body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code',
-            (req.body.limit != undefined) ? `LIMIT ${req.body.limit}` : ''));
-        res.json(dbRes.rows);
-        await pgClient.end();
-    } catch(error) {
-        log(error);
-    };
+[
+    {
+        path: '/api/chart1',
+        sqlParams: [
+            body => (body.subjects != undefined && body.subjects.length > 0) ? `AND course_subject IN (${body.subjects.map(s => `'${s}'`).join(', ')})` : '',
+            body => (body.components != undefined && body.components.length > 0) ? `AND LEFT(component, 3) IN (${body.components.map(s => `'${s}'`).join(', ')})` : '',
+            body => `'${body.week.slice(0,10)}'`
+        ],
+        callback: rows => rows.map(row => row.time_frame)
+    },
+    {
+        path: '/api/chart2',
+        sqlParams: [
+            body => body.subject,
+            body => body.code
+        ]
+    },
+    {
+        path: '/api/course_changes',
+        sqlParams: [
+            body => (body.order_by != undefined && body.order_by.length > 0) ?
+                `${body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code',
+            body => (body.limit != undefined) ? `LIMIT ${body.limit}` : ''
+        ]
+    }
+].forEach(route => {
+    app.post(route.path, async (req, res) => {
+        try {
+            const pgClient = createPGClient();
+            await pgClient.connect();
+            log(`POST ${req.path}`);
+            const sqlStrs = route.sqlParams.map(func => func(req.body));
+            const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`, ...sqlStrs));
+            res.json((route.callback ?? (r => r))(dbRes.rows));
+            await pgClient.end();
+        } catch(error) {
+            log(error);
+        }
+    });
 });
 
 //<------------------------------------------------------------------------------------------------->

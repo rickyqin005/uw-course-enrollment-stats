@@ -1,9 +1,5 @@
 const fs = require('fs');
 const pg = require('pg');
-const types = pg.types;
-types.setTypeParser(1114, function(stringValue) {
-    return new Date(`${stringValue}Z`);
-});
 
 export function createPGClient() {
     return new pg.Client({
