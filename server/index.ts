@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const staticData = require('./data.json');
 import { createPGClient, formatSQL, log } from './utility';
-import refreshAPI from './refreshData';
+import refreshData from './refreshData';
 
 const app = express();
 const port = 3000;
@@ -43,7 +43,8 @@ app.get('/api/check', (req, res) => {
         sqlParams: ['', 'subject, code']
     },
     { path: '/api/enrollment_history' },
-    { path: '/api/changes' },
+    { path: '/api/course_changes' },
+    { path: '/api/section_changes' },
     {
         path: '/api/chart1',
         sqlParams: ['', '', `'${staticData.defaultWeek.slice(0,10)}'`],
@@ -99,10 +100,11 @@ app.post('/api/course_enrollment', async (req, res) => {
 
 //<------------------------------------------------------------------------------------------------->
 
-refreshAPI();
+// refresh every 15 minutes
+refreshData();
 setInterval(() => {
-    refreshAPI()
+    refreshData()
     .catch(error => log(error));
-}, 600000);
+}, 900000);
 
 // https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html

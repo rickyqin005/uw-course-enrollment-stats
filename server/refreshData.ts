@@ -11,7 +11,7 @@ const daysOfWeekAbbrev: string[] = staticData.daysOfWeekAbbrev;
 import { createPGClient, arrsFormat, formatSQL, log } from './utility';
 
 // refresh info every 15 minutes
-export default async function refreshAPI() {
+export default async function refreshData() {
     const requests: Promise<any>[] = subjects.map(subject =>
         axios.get(`https://classes.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?level=under&sess=1249&subject=${subject}`));
     const webpages = await Promise.all(requests);
