@@ -58,13 +58,13 @@ export default function EnrollmentChart() {
               name="Subject:"
               options={Array.from(chartSelectOptions.keys()).map(subject => { return { value: subject, label: subject }})}
               isMultiSelect={false}
-              defaultValue={{ value: 'MATH', label: 'MATH' }}
+              defaultValue={{ value: 'MTHEL', label: 'MTHEL' }}
               onChange={subject => setChartSubjectSelected(subject.value)}/>
         <ChartOption
               name="Code:"
               options={(chartSelectOptions.get(chartSubjectSelected) ?? []).map(code => { return { value: code, label: code }})}
               isMultiSelect={false}
-              defaultValue={{ value: '135', label: '135' }}
+              defaultValue={{ value: '99', label: '99' }}
               onChange={code => setChartCodeSelected(code.value)}/>
         </div>
         <div className="chart-container" style={{width: 'min(50vw, 1200px)'}}>
