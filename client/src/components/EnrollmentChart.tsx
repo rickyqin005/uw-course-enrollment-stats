@@ -43,7 +43,10 @@ export default function EnrollmentChart() {
         })
         .then(res => res.json())
         .then(data => {
-            setChartData(data.map(row => { return { Enrollment: row.enrollment, name: moment(row.name).format('MMM D') };}));
+            setChartData(data.map(row => { return {
+                Enrollment: row.enrollment,
+                name: moment(row.name).subtract(moment().utcOffset(), 'minutes').format('MMM D')
+            };}));
         })
         .catch(error => console.log(error));
       }, [chartSubjectSelected, chartCodeSelected]);
