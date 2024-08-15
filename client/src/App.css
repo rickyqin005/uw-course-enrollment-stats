@@ -26,7 +26,6 @@ h2 {
   font-size: calc(12px + 0.2vmin + 0.2vmax);
   margin-top:3vmin;
   margin-bottom:3vmin;
-  width: min(75vw, 1300px);
   display: flex;
   align-items: center;
   justify-content: center;

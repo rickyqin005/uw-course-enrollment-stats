@@ -38,7 +38,6 @@ app.get('/api/check', (req, res) => {
     { path: '/api/courses' },
     { path: '/api/sections' },
     { path: '/api/subjects' },
-    { path: '/api/enrollment_history' },
     {
         path: '/api/course_changes',
         sqlParams: ['courses.subject, courses.code', '']
@@ -48,6 +47,10 @@ app.get('/api/check', (req, res) => {
         path: '/api/chart1',
         sqlParams: ['', '', `'${staticData.defaultWeek.slice(0,10)}'`],
         callback: rows => rows.map(row => row.time_frame)
+    },
+    {
+        path: '/api/chart2',
+        sqlParams: ['MATH', '135']
     },
     { path: '/api/testing' }
 ].forEach(route => {
@@ -75,6 +78,20 @@ app.post('/api/chart1', async (req, res) => {
             (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
             `'${req.body.week.slice(0,10)}'`));
         res.json(dbRes.rows.map(time_frame => time_frame.time_frame));
+        await pgClient.end();
+    } catch(error) {
+        log(error);
+    };
+});
+
+app.post('/api/chart2', async (req, res) => {
+    try {
+        const pgClient = createPGClient();
+        await pgClient.connect();
+        log(`POST ${req.path}`);
+        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
+            req.body.subject, req.body.code));
+        res.json(dbRes.rows);
         await pgClient.end();
     } catch(error) {
         log(error);

@@ -16,7 +16,7 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected, w
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
     React.useEffect(() => {
-        console.log(`options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);
+        console.log(`chart1 options: ${subjectsSelected}|${componentsSelected}|${weekSelected}`);
         setChartDataLoading(true);
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
             method: "POST",
@@ -39,7 +39,7 @@ export default function FrequencyChart({ subjectsSelected, componentsSelected, w
         .catch(error => console.log(error));
       }, [subjectsSelected, componentsSelected, weekSelected]);
     
-    return <div className="chart-container" >
+    return <div className="chart-container" style={{width: 'min(75vw, 1200px)'}}>
         {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
         <ResponsiveContainer aspect={2}>
             <LineChart data={chartData} style={{opacity: (chartDataLoading ? 0.25 : 1)}}

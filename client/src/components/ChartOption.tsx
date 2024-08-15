@@ -2,7 +2,8 @@ import React from 'react';
 import Select from 'react-select';
 
 export default function ChartOption({ name, options, isMultiSelect, defaultValue, onChange }:
-    { name: string, options: { value: any, label: any }[], isMultiSelect: boolean, defaultValue: any, onChange: (arg0: any) => void }) {
+    { name: string, options: { value: any, label: any }[], isMultiSelect: boolean | undefined,
+    defaultValue: any, onChange: (arg0: any) => void }) {
 
     return <div className="option-container">
         <div className="option-name">{name}</div>
