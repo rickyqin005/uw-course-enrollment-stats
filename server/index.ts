@@ -38,12 +38,11 @@ app.get('/api/check', (req, res) => {
     { path: '/api/courses' },
     { path: '/api/sections' },
     { path: '/api/subjects' },
-    {
-        path: '/api/course_enrollment',
-        sqlParams: ['', 'subject, code']
-    },
     { path: '/api/enrollment_history' },
-    { path: '/api/course_changes' },
+    {
+        path: '/api/course_changes',
+        sqlParams: ['courses.subject, courses.code', '']
+    },
     { path: '/api/section_changes' },
     {
         path: '/api/chart1',
@@ -71,7 +70,7 @@ app.post('/api/chart1', async (req, res) => {
         const pgClient = createPGClient();
         await pgClient.connect();
         log(`POST ${req.path}`);
-        const dbRes = await pgClient.query(formatSQL('./postgres/api/chart1.sql',
+        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
             (req.body.subjects != undefined && req.body.subjects.length > 0) ? `AND course_subject IN (${req.body.subjects.map(s => `'${s}'`).join(', ')})` : '',
             (req.body.components != undefined && req.body.components.length > 0) ? `AND LEFT(component, 3) IN (${req.body.components.map(s => `'${s}'`).join(', ')})` : '',
             `'${req.body.week.slice(0,10)}'`));
@@ -82,12 +81,12 @@ app.post('/api/chart1', async (req, res) => {
     };
 });
 
-app.post('/api/course_enrollment', async (req, res) => {
+app.post('/api/course_changes', async (req, res) => {
     try {
         const pgClient = createPGClient();
         await pgClient.connect();
         log(`POST ${req.path}`);
-        const dbRes = await pgClient.query(formatSQL('./postgres/api/course_enrollment.sql',
+        const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`,
             (req.body.order_by != undefined && req.body.order_by.length > 0) ?
                 `${req.body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code',
             (req.body.limit != undefined) ? `LIMIT ${req.body.limit}` : ''));
