@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 const colHeaders = [
     { name: 'Rank', textAlign: 'left', paddingLeft: '20px', paddingRight: '40px' },
@@ -39,10 +39,8 @@ export default function CoursesTable() {
         })
         .then(res => res.json())
         .then(data => {
-            setTableData(data
-                // .filter(row => row.subject.slice(0,2) != 'PD' && !(row.subject == 'MTHEL' && row.code == '99') &&
-                //     !(row.subject == 'GENE' && row.code == '119'))
-                .map(row => [row.subject, row.code, row.title, row.curr_enroll_total,
+            setTableData(data.map(row => 
+                [row.subject, row.code, row.title, row.curr_enroll_total,
                     `${row.day_change == 0 ? '' : `${row.day_change > 0 ? triangleUp : triangleDown} ${Math.abs(row.day_change)}`}`
                 ]));
         })

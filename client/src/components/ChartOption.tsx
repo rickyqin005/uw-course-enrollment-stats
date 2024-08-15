@@ -1,3 +1,4 @@
+import React from 'react';
 import Select from 'react-select';
 
 export default function ChartOption({ name, options, isMultiSelect, defaultValue, onChange }:
