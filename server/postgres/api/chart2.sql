@@ -10,5 +10,4 @@ FROM (
     GROUP BY check_time, LEFT(component, 3)
     ORDER BY check_time
 )
-WHERE EXTRACT(hour from check_time) = 18
 GROUP BY check_time;

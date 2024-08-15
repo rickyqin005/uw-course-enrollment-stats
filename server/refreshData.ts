@@ -83,6 +83,7 @@ export default async function refreshData() {
                     }
 
                     const currDate = new Date(Date.now());
+                    currDate.setUTCHours(0);
                     currDate.setUTCMinutes(0);
                     currDate.setUTCSeconds(0);
                     currDate.setUTCMilliseconds(0);

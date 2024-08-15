@@ -2,11 +2,9 @@ SELECT
     courses.subject, courses.code,
     units, title,
     curr_enroll_total,
-    prev_hour_enroll_total,
     prev_day_enroll_total,
     prev_week_enroll_total,
     prev_month_enroll_total,
-    hour_change,
     day_change,
     week_change,
     month_change
