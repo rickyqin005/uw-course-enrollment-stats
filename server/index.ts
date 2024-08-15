@@ -54,7 +54,7 @@ app.get('/api/check', (req, res) => {
     },
     {
         path: '/api/chart2',
-        sqlParams: ['MATH', '135']
+        sqlParams: ['MTHEL', '99']
     },
     { path: '/api/testing' }
 ].forEach(route => {
@@ -71,7 +71,6 @@ app.get('/api/check', (req, res) => {
         }
     });
 });
-
 
 [
     {
@@ -121,6 +120,6 @@ refreshData();
 setInterval(() => {
     refreshData()
     .catch(error => log(error));
-}, 900000);
+}, 1800000);
 
 // https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html

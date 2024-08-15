@@ -11,9 +11,9 @@ interface TimeFrame {
 export default function EnrollmentChart() {
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
-    const [chartSelectOptions, setChartSelectOptions] = React.useState<Map<String, String[]>>(new Map([['MATH', ['135']]]));
-    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<String>('MATH');
-    const [chartCodeSelected, setChartCodeSelected] = React.useState<String>('135');
+    const [chartSelectOptions, setChartSelectOptions] = React.useState<Map<String, String[]>>(new Map([['MTHEL', ['99']]]));
+    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<String>('MTHEL');
+    const [chartCodeSelected, setChartCodeSelected] = React.useState<String>('99');
 
     React.useEffect(() => {
         console.log('fetching chart2 options...');
@@ -69,7 +69,7 @@ export default function EnrollmentChart() {
         </div>
         <div className="chart-container" style={{width: 'min(50vw, 1200px)'}}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
-            <ResponsiveContainer aspect={1.5}>
+            <ResponsiveContainer aspect={2}>
                 <LineChart data={chartData}
                     style={{opacity: (chartDataLoading ? 0.25 : 1)}}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
