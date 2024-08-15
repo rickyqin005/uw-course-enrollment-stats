@@ -17,3 +17,5 @@ ON CONFLICT(section_id, check_time) DO UPDATE SET
 
 DELETE FROM timeslots;
 INSERT INTO timeslots VALUES %SQL4;
+
+REFRESH MATERIALIZED VIEW course_changes;
