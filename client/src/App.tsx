@@ -4,18 +4,36 @@ import FrequencyChart from "./components/FrequencyChart.tsx";
 import CoursesTable from "./components/CoursesTable.tsx";
 import EnrollmentChart from "./components/EnrollmentChart.tsx";
 
-function App() {
-  return (
-    <div className="App">
-      <div className="App-body">
-        <h1>UW Course Enrollment Stats</h1>
-        <FrequencyChart />
-        <EnrollmentChart />
-        <h2>Which courses are taken the most?</h2>
-        <CoursesTable />
-      </div>
-    </div>
-  );
-}
+export default function App() {
+	const [courseCodes, setCourseCodes] = React.useState<Map<String, String[]>>(new Map([['MTHEL', ['99']]]));
+	const [components, setComponents] = React.useState<String[]>([]);
 
-export default App;
+	React.useEffect(() => {
+		fetch(`${process.env.REACT_APP_SERVER_URL}/api/subjects`, {
+			method: "GET", mode: 'cors',
+			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+		}).then(res => res.json())
+		.then(data => {
+			const map = new Map();
+			data.forEach(subject => map.set(subject.subject, subject.course_codes));
+			setCourseCodes(map);
+		});
+		fetch(`${process.env.REACT_APP_SERVER_URL}/api/components`, {
+			method: "GET", mode: 'cors',
+			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+		}).then(res => res.json())
+		.then(data => setComponents(data));
+	}, []);
+
+	return (
+		<div className="App">
+		<div className="App-body">
+			<h1>UW Course Enrollment Stats</h1>
+			<FrequencyChart courseCodes={courseCodes} components={components} />
+			<EnrollmentChart courseCodes={courseCodes} />
+			<h2>Which courses are taken the most?</h2>
+			<CoursesTable />
+		</div>
+		</div>
+	);
+}

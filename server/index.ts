@@ -43,6 +43,10 @@ app.get('/api/check', (req, res) => {
     { path: '/api/sections' },
     { path: '/api/subjects' },
     {
+        path: '/api/components',
+        callback: rows => rows.map(row => row.component)
+    },
+    {
         path: '/api/course_changes',
         sqlParams: ['courses.subject, courses.code', '']
     },

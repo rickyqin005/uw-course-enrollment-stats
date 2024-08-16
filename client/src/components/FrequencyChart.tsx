@@ -3,7 +3,7 @@ import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line
 import ChartOption from "./ChartOption.tsx";
 const moment = require('moment');
 
-const staticData = require('../data.json');
+const staticData = require('../const.json');
 let currWeek = moment(staticData.firstWeek);
 const weeksList: {value: string, label: string }[] = [];
 while(currWeek.isSameOrBefore(moment(staticData.lastWeek))) {
@@ -23,7 +23,7 @@ interface TimeFrame {
     Friday: number
 }
 
-export default function FrequencyChart() {
+export default function FrequencyChart({ courseCodes, components }) {
         
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
@@ -60,13 +60,13 @@ export default function FrequencyChart() {
         <div className="chart-options">
         <ChartOption
             name="Subject:"
-            options={staticData.subjects.map(subject => { return { value: subject, label: subject }})}
+            options={Array.from(courseCodes.keys()).map(subject => { return { value: subject, label: subject }})}
             isMultiSelect={true}
             defaultValue={[]}
             onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>
         <ChartOption
             name="Component:"
-            options={staticData.courseComponents.map(component => { return { value: component, label: component }})}
+            options={components.map(component => { return { value: component, label: component }})}
             isMultiSelect={true}
             defaultValue={[]}
             onChange={components => setChartComponentsSelected(components.map(component => component.value))}/>
@@ -74,7 +74,7 @@ export default function FrequencyChart() {
             name="Week of:"
             options={weeksList}
             isMultiSelect={false}
-            defaultValue={weeksList[1]}
+            defaultValue={weeksList[staticData.defaultWeekIndex]}
             onChange={week => setChartWeekSelected(week.value)}/>
         </div>
         <div className="chart-container" style={{width: 'min(75vw, 1200px)'}}>

@@ -8,31 +8,15 @@ interface TimeFrame {
     enrollment: number
 }
 
-export default function EnrollmentChart() {
+export default function EnrollmentChart({ courseCodes }) {
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
-    const [chartSelectOptions, setChartSelectOptions] = React.useState<Map<String, String[]>>(new Map([['MTHEL', ['99']]]));
     const [chartSubjectSelected, setChartSubjectSelected] = React.useState<String>('MTHEL');
     const [chartCodeSelected, setChartCodeSelected] = React.useState<String>('99');
 
     React.useEffect(() => {
-        console.log('fetching chart2 options...');
-        setChartDataLoading(true);
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/subjects`, {
-            method: "GET", mode: 'cors',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        }).then(res => res.json())
-        .then(data => {
-            const map = new Map();
-            data.forEach(subject => map.set(subject.subject, subject.course_codes));
-            setChartSelectOptions(map);
-            setChartDataLoading(false);
-            console.log('fetched chart2 options');
-        });
-    }, []);
-
-    React.useEffect(() => {
         console.log(`chart2 options: ${chartSubjectSelected}|${chartCodeSelected}`);
+        setChartDataLoading(true);
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart2`, {
             method: "POST", mode: 'cors',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
@@ -47,6 +31,7 @@ export default function EnrollmentChart() {
                 Enrollment: row.enrollment,
                 name: moment(row.name).subtract(moment().utcOffset(), 'minutes').format('MMM D')
             };}));
+            setChartDataLoading(false);
         })
         .catch(error => console.log(error));
       }, [chartSubjectSelected, chartCodeSelected]);
@@ -56,13 +41,13 @@ export default function EnrollmentChart() {
         <div className="chart-options">
         <ChartOption
               name="Subject:"
-              options={Array.from(chartSelectOptions.keys()).map(subject => { return { value: subject, label: subject }})}
+              options={Array.from(courseCodes.keys()).map(subject => { return { value: subject, label: subject }})}
               isMultiSelect={false}
               defaultValue={{ value: 'MTHEL', label: 'MTHEL' }}
               onChange={subject => setChartSubjectSelected(subject.value)}/>
         <ChartOption
               name="Code:"
-              options={(chartSelectOptions.get(chartSubjectSelected) ?? []).map(code => { return { value: code, label: code }})}
+              options={(courseCodes.get(chartSubjectSelected) ?? []).map(code => { return { value: code, label: code }})}
               isMultiSelect={false}
               defaultValue={{ value: '99', label: '99' }}
               onChange={code => setChartCodeSelected(code.value)}/>

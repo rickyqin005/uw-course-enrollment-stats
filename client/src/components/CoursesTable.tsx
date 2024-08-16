@@ -47,13 +47,18 @@ export default function CoursesTable() {
         .catch(error => console.log(error));
     }, []);
     return <table className="courses-table">
-        { colHeaders.length == 0 ? '' : 
-            <tr style={{ backgroundColor: '#e6e6ff' }}>
-                {colHeaders.map(header => <th style={{ ...header }}>{header.name}</th> )}
-            </tr>
+        { colHeaders.length == 0 ? '' :
+            <thead>
+                <tr style={{ backgroundColor: '#e6e6ff' }}>
+                    {colHeaders.map(header => <th style={{ ...header }}>{header.name}</th> )}
+                </tr>
+            </thead>
         }
         { tableData.length == 0 ? '' :
-            tableData.map((row, idx) => <Row style={{ backgroundColor: (idx%2 == 1 ? '#F8F8FF' : undefined) }} values={[idx+1].concat(row)}/>)
+            <tbody>
+                {tableData.map((row, idx) =>
+                    <Row style={{ backgroundColor: (idx%2 == 1 ? '#F8F8FF' : undefined) }} values={[idx+1].concat(row)}/>)}
+            </tbody>
         }
     </table>;
 }

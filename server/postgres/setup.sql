@@ -5,6 +5,7 @@ DROP TABLE timeslots;
 DROP TABLE enrollment;
 DROP TABLE sections;
 DROP TABLE courses;
+DROP TABLE components;
 DROP TABLE subjects;
 
 CREATE TABLE subjects (
@@ -187,6 +188,30 @@ INSERT INTO subjects VALUES
 ('WKRPT', NULL),
 ('WS', NULL),
 ('YC', NULL);
+
+CREATE TABLE components (
+    component   VARCHAR(3)  PRIMARY KEY
+);
+INSERT INTO components VALUES
+('LEC'),
+('TUT'),
+('LAB'),
+('TST'),
+('CLN'),
+('DIS'),
+('ENS'),
+('ESS'),
+('FLD'),
+('FLT'),
+('OLN'),
+('ORL'),
+('PRA'),
+('PRJ'),
+('RDG'),
+('SEM'),
+('STU'),
+('WRK'),
+('WSP');
 
 CREATE TABLE courses (
     subject     VARCHAR(6)      NOT NULL REFERENCES subjects(subject),
