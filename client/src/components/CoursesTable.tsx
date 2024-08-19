@@ -7,7 +7,7 @@ const colHeaders = [
     [
         { name: 'Rank', rowSpan: 2, textAlign: 'left', paddingLeft: '20px', paddingRight: '40px',
             sortComp: (a: RowData[], b: RowData[]) => (a[0] as number) - (b[0] as number)
-         },
+        },
         { name: 'Course', rowSpan: 2, columnSpan: 2, textAlign: 'left', paddingRight: '10px',
             sortComp: (a: RowData[], b: RowData[]) => {
                 if((a[1] as string).localeCompare(b[1] as string) == 0) return (a[2] as string).localeCompare(b[2] as string);
@@ -15,22 +15,22 @@ const colHeaders = [
             } },
         { name: 'Title', rowSpan: 2, textAlign: 'left', paddingRight: '20px',
             sortComp: (a: RowData[], b: RowData[]) => (a[3] as string).localeCompare(b[3] as string)
-         },
+        },
         { name: 'Enrollment', rowSpan: 2, textAlign: 'right', paddingRight: '20px',
             sortComp: (a: RowData[], b: RowData[]) => (a[4] as number) - (b[4] as number)
-         },
+        },
         { name: 'Change', columnSpan: 3, textAlign: 'center', paddingTop: '8px' }
     ],
     [
         { name: 'Day', paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px',
-            sortComp: (a: RowData[], b: RowData[]) => (b[5] as ValueAndLabel).value - (a[5] as ValueAndLabel).value
+            sortComp: (a: RowData[], b: RowData[]) => (a[5] as ValueAndLabel).value - (b[5] as ValueAndLabel).value
         },
         { name: 'Week', paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px',
-            sortComp: (a: RowData[], b: RowData[]) => (b[6] as ValueAndLabel).value - (a[6] as ValueAndLabel).value
-         },
+            sortComp: (a: RowData[], b: RowData[]) => (a[6] as ValueAndLabel).value - (b[6] as ValueAndLabel).value
+        },
         { name: 'Month', paddingLeft: '15px', paddingRight: '20px', paddingBottom: '8px',
-            sortComp: (a: RowData[], b: RowData[]) => (b[7] as ValueAndLabel).value - (a[7] as ValueAndLabel).value
-         }
+            sortComp: (a: RowData[], b: RowData[]) => (a[7] as ValueAndLabel).value - (b[7] as ValueAndLabel).value
+        }
     ]
 ];
 
@@ -95,14 +95,11 @@ export default function CoursesTable() {
                             <th style={header}
                                 rowSpan={header.rowSpan ?? undefined} 
                                 colSpan={header.columnSpan ?? undefined}
-                                onClick={() => {
-                                    if(sortColumn != null && sortColumn.index[0] == i && sortColumn.index[1] == j) {
-                                        console.log({ ...sortColumn, dir: !sortColumn.dir})
+                                onClick={(sortColumn != null || header.sortComp == undefined) ? undefined :
+                                () => {
+                                    if(sortColumn.index[0] == i && sortColumn.index[1] == j)
                                         setSortColumn({ ...sortColumn, dir: !sortColumn.dir});
-                                    } else {
-                                        console.log({ index: [i,j], dir: true })
-                                        setSortColumn({ index: [i,j], dir: true });
-                                    }
+                                    else setSortColumn({ index: [i,j], dir: true });
                                 }}>
                                     {`${header.name}${(sortColumn != null && sortColumn.index[0] == i && sortColumn.index[1] == j) ?
                                         ` ${(sortColumn.dir ? triangleUp : triangleDown)}` : ''}`}
