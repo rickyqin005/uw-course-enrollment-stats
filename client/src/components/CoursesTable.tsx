@@ -95,7 +95,7 @@ export default function CoursesTable() {
                             <th style={header}
                                 rowSpan={header.rowSpan ?? undefined} 
                                 colSpan={header.columnSpan ?? undefined}
-                                onClick={(sortColumn != null || header.sortComp == undefined) ? undefined :
+                                onClick={(sortColumn == null || header.sortComp == undefined) ? undefined :
                                 () => {
                                     if(sortColumn.index[0] == i && sortColumn.index[1] == j)
                                         setSortColumn({ ...sortColumn, dir: !sortColumn.dir});
