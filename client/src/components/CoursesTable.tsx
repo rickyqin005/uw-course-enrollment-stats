@@ -1,20 +1,27 @@
 import React from "react";
 
 const colHeaders = [
-    { name: 'Rank', textAlign: 'left', paddingLeft: '20px', paddingRight: '40px' },
-    { name: 'Course', textAlign: 'left', paddingRight: '10px' },
-    { textAlign: 'left', paddingRight: '60px' },
-    { name: 'Title', textAlign: 'left', paddingRight: '20px' },
-    { name: 'Enrollment', textAlign: 'right', paddingRight: '20px' },
-    { name: 'Change', textAlign: 'left', paddingRight: '20px' }
+    [
+        { name: 'Rank', rowSpan: 2, textAlign: 'left', paddingLeft: '20px', paddingRight: '40px' },
+        { name: 'Course', rowSpan: 2, columnSpan: 2, textAlign: 'left', paddingRight: '10px', onClick: () => console.log('clicked!')},
+        { name: 'Title', rowSpan: 2, textAlign: 'left', paddingRight: '20px' },
+        { name: 'Enrollment', rowSpan: 2, textAlign: 'right', paddingRight: '20px' },
+        { name: 'Change', columnSpan: 3, textAlign: 'center', paddingTop: '8px' }
+    ],
+    [
+        { name: 'Day', paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px' },
+        { name: 'Week', paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px' },
+        { name: 'Month', paddingLeft: '15px', paddingRight: '20px', paddingBottom: '8px' }
+    ]
 ];
 const cols = [
     { textAlign: 'left', paddingLeft: '30px', paddingRight: '30px' },
     { textAlign: 'left', paddingRight: '10px' },
-    { textAlign: 'left', paddingRight: '60px' },
+    { textAlign: 'left', paddingRight: '30px' },
     { textAlign: 'left', paddingRight: '20px' },
     { textAlign: 'right', paddingRight: '20px' },
-    { textAlign: 'left', paddingLeft: '20px', paddingRight: '20px' }
+    { textAlign: 'left', paddingLeft: '15px', paddingRight: '15px' },
+    { textAlign: 'left', paddingLeft: '15px', paddingRight: '20px' }
 ];
 
 const triangleUp = '▲';
@@ -41,7 +48,9 @@ export default function CoursesTable() {
         .then(data => {
             setTableData(data.map(row => 
                 [row.subject, row.code, row.title, row.curr_enroll_total,
-                    `${row.day_change == 0 ? '' : `${row.day_change > 0 ? triangleUp : triangleDown} ${Math.abs(row.day_change)}`}`
+                    `${(row.day_change ?? 0) == 0 ? '' : `${row.day_change > 0 ? triangleUp : triangleDown} ${Math.abs(row.day_change)}`}`,
+                    `${(row.week_change ?? 0) == 0 ? '' : `${row.week_change > 0 ? triangleUp : triangleDown} ${Math.abs(row.week_change)}`}`,
+                    `${(row.month_change ?? 0) == 0 ? '' : `${row.month_change > 0 ? triangleUp : triangleDown} ${Math.abs(row.month_change)}`}`
                 ]));
         })
         .catch(error => console.log(error));
@@ -49,9 +58,15 @@ export default function CoursesTable() {
     return <table className="courses-table">
         { colHeaders.length == 0 ? '' :
             <thead>
-                <tr style={{ backgroundColor: '#e6e6ff' }}>
-                    {colHeaders.map(header => <th style={{ ...header }}>{header.name}</th> )}
-                </tr>
+                {colHeaders.map(headerRow =>
+                    <tr>
+                        {headerRow.map(header =>
+                            <th style={header}
+                                rowSpan={header.rowSpan ?? undefined} 
+                                colSpan={header.columnSpan ?? undefined}
+                                onClick={header.onClick ?? undefined}>{header.name}</th>)}
+                    </tr>
+                )}
             </thead>
         }
         { tableData.length == 0 ? '' :

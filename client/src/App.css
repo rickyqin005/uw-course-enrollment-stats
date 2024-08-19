@@ -60,10 +60,11 @@ h2 {
   border-spacing: 0px;
   border-width: 0px;
 }
-th {
-  padding-top: 8px;
-  padding-bottom: 8px;
+
+thead {
+  background-color: #e6e6ff;
 }
+
 td {
   padding-top: 6px;
   padding-bottom: 6px;

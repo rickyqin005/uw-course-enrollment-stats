@@ -52,15 +52,18 @@ export default function EnrollmentChart({ courseCodes }) {
               defaultValue={{ value: '99', label: '99' }}
               onChange={code => setChartCodeSelected(code.value)}/>
         </div>
-        <div className="chart-container" style={{width: 'min(50vw, 1200px)'}}>
+        <div className="chart-container" style={{ width: 'min(50vw, 1200px)' }}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={chartData}
-                    style={{opacity: (chartDataLoading ? 0.25 : 1)}}
+                    style={{ opacity: (chartDataLoading ? 0.25 : 1) }}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="2" />
                     <XAxis dataKey="name" />
-                    <YAxis label={{ value: "# of Students", angle: -90, position: "insideLeft"}} domain={['auto', 'auto']} />
+                    <YAxis label={{ value: "# of Students", angle: -90, position: "left" }}
+                        domain={['auto', 'auto']}
+                        allowDecimals={false}
+                        tickFormatter={val => val.toLocaleString()} />
                     <Tooltip />
                     <Legend />
                     <Line type="monotone" dataKey="Enrollment" stroke="Black" />
