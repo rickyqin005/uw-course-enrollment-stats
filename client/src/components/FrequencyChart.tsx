@@ -88,11 +88,11 @@ export default function FrequencyChart({ courseCodes, components }) {
                     <Tooltip
                         formatter={val => val.toLocaleString()} />
                     <Legend />
-                    <Line type="monotone" dataKey="Monday" stroke="blue" />
-                    <Line type="monotone" dataKey="Tuesday" stroke="red" />
-                    <Line type="monotone" dataKey="Wednesday" stroke="DarkOrange" />
-                    <Line type="monotone" dataKey="Thursday" stroke="green" />
-                    <Line type="monotone" dataKey="Friday" stroke="purple" />
+                    <Line type="monotone" dataKey="Monday" stroke="blue" strokeWidth={2} />
+                    <Line type="monotone" dataKey="Tuesday" stroke="red" strokeWidth={2} />
+                    <Line type="monotone" dataKey="Wednesday" stroke="DarkOrange" strokeWidth={2} />
+                    <Line type="monotone" dataKey="Thursday" stroke="green" strokeWidth={2} />
+                    <Line type="monotone" dataKey="Friday" stroke="purple" strokeWidth={2} />
                 </LineChart>
             </ResponsiveContainer>
         </div>

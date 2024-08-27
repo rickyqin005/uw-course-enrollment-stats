@@ -31,9 +31,7 @@ export default function EnrollmentChart({ courseCodes }) {
                 let currDay = moment(data[data.length-1].name).add(1, 'days');
                 const lastDay = moment("2024-09-30T04:00:00.000Z");
                 while(currDay.isSameOrBefore(lastDay)) {
-                    data.push({
-                        name: currDay.toISOString()
-                    });
+                    data.push({ name: currDay.toISOString() });
                     currDay.add(1, 'days');
                 }
             }
@@ -76,7 +74,11 @@ export default function EnrollmentChart({ courseCodes }) {
                         formatter={val => val.toLocaleString()}
                         labelFormatter={val => toDateString(val)} />
                     <Legend />
-                    <Line type="monotone" name={`${chartSubjectSelected} ${chartCodeSelected}`} dataKey="enrollment" stroke="Black" />
+                    <Line type="monotone"
+                        name={`${chartSubjectSelected} ${chartCodeSelected}`}
+                        dataKey="enrollment"
+                        stroke="Black"
+                        strokeWidth={2}/>
                 </LineChart>
             </ResponsiveContainer>
         </div>
