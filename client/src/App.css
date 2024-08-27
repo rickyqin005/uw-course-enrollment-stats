@@ -56,9 +56,11 @@ h2 {
 }
 
 .courses-table {
-  font-size: calc(15px + 0.2vmin + 0.2vmax);
+  font-size: calc(13px + 0.2vmin + 0.2vmax);
   border-spacing: 0px;
   border-width: 0px;
+  margin-top: 10px;
+  margin-bottom: 25px;
 }
 
 thead {
