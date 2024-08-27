@@ -55,11 +55,20 @@ h2 {
   margin-right: 10px;
 }
 
+.pagination {
+  display: flex;
+  flex-direction: row;
+}
+
+.pagination > * {
+  margin-left: 40px;
+}
+
 .courses-table {
   font-size: calc(13px + 0.2vmin + 0.2vmax);
   border-spacing: 0px;
   border-width: 0px;
-  margin-top: 10px;
+  margin-top: 15px;
   margin-bottom: 25px;
 }
 

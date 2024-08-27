@@ -77,7 +77,7 @@ export default function FrequencyChart({ courseCodes, components }) {
             defaultValue={weeksList[staticData.defaultWeekIndex]}
             onChange={week => setChartWeekSelected(week.value)}/>
         </div>
-        <div className="chart-container" style={{ width: 'min(75vw, 1200px)' }}>
+        <div className="chart-container" style={{ width: 'max(min(70vw, 1200px), 700px)' }}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={chartData}

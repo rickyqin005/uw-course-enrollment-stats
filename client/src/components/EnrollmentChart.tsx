@@ -28,7 +28,7 @@ export default function EnrollmentChart({ courseCodes }) {
         .then(res => res.json())
         .then(data => {
             setChartData(data.map(row => { return {
-                Enrollment: row.enrollment,
+                enrollment: row.enrollment,
                 name: moment(row.name).subtract(moment().utcOffset(), 'minutes').format('MMM D')
             };}));
             setChartDataLoading(false);
@@ -52,7 +52,7 @@ export default function EnrollmentChart({ courseCodes }) {
               defaultValue={{ value: '99', label: '99' }}
               onChange={code => setChartCodeSelected(code.value)}/>
         </div>
-        <div className="chart-container" style={{ width: 'min(50vw, 1200px)' }}>
+        <div className="chart-container" style={{ width: 'max(min(60vw, 1200px), 600px)' }}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={chartData}
@@ -66,7 +66,7 @@ export default function EnrollmentChart({ courseCodes }) {
                         tickFormatter={val => val.toLocaleString()} />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Enrollment" stroke="Black" />
+                    <Line type="monotone" name={`${chartSubjectSelected} ${chartCodeSelected}`} dataKey="enrollment" stroke="Black" />
                 </LineChart>
             </ResponsiveContainer>
         </div>
