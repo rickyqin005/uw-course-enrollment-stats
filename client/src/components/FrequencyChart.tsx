@@ -37,10 +37,7 @@ export default function FrequencyChart({ courseCodes, components }) {
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
             method: "POST",
             mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 subjects: chartSubjectsSelected,
                 components: chartComponentsSelected,

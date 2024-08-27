@@ -9,20 +9,16 @@ export default function App() {
 	const [components, setComponents] = React.useState<String[]>([]);
 
 	React.useEffect(() => {
-		fetch(`${process.env.REACT_APP_SERVER_URL}/api/subjects`, {
+		fetch(`${process.env.REACT_APP_SERVER_URL}/api/info`, {
 			method: "GET", mode: 'cors',
 			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
 		}).then(res => res.json())
 		.then(data => {
 			const map = new Map();
-			data.forEach(subject => map.set(subject.subject, subject.course_codes));
+			data.subjects.forEach(subject => map.set(subject.subject, subject.course_codes));
 			setCourseCodes(map);
-		});
-		fetch(`${process.env.REACT_APP_SERVER_URL}/api/components`, {
-			method: "GET", mode: 'cors',
-			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-		}).then(res => res.json())
-		.then(data => setComponents(data));
+			setComponents(data.components);
+		}).catch(error => console.log(error));
 	}, []);
 
 	return (

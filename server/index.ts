@@ -39,16 +39,15 @@ app.get('/api/check', (req, res) => {
 });
 
 [
+    {
+        path: '/api/info',
+        callback: rows => rows[0]
+    },
     { path: '/api/courses' },
     { path: '/api/sections' },
-    { path: '/api/subjects' },
-    {
-        path: '/api/components',
-        callback: rows => rows.map(row => row.component)
-    },
     {
         path: '/api/course_changes',
-        sqlParams: ['courses.subject, courses.code', '']
+        sqlParams: ['courses.subject, courses.code']
     },
     { path: '/api/section_changes' },
     {
@@ -97,8 +96,7 @@ app.get('/api/check', (req, res) => {
         path: '/api/course_changes',
         sqlParams: [
             body => (body.order_by != undefined && body.order_by.length > 0) ?
-                `${body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code',
-            body => (body.limit != undefined) ? `LIMIT ${body.limit}` : ''
+                `${body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code'
         ]
     }
 ].forEach(route => {

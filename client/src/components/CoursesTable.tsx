@@ -51,13 +51,9 @@ export default function CoursesTable() {
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/course_changes`, {
             method: "POST",
             mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                order_by: [{ col: 'curr_enroll_total', order: false }, { col: 'courses.subject' }, { col: 'courses.code' }],
-                limit: 10000
+                order_by: [{ col: 'curr_enroll_total', order: false }, { col: 'courses.subject' }, { col: 'courses.code' }]
             })
         })
         .then(res => res.json())
