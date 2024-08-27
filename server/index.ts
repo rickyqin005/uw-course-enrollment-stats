@@ -59,7 +59,14 @@ app.get('/api/check', (req, res) => {
         path: '/api/chart2',
         sqlParams: ['MTHEL', '99']
     },
-    { path: '/api/testing' }
+    {
+        path: '/api/chart3',
+        sqlParams: ['MATH', '137', 'LEC'],
+        callback: rows => rows.map(row => { return {
+            name: row.name,
+            ...Object.assign({}, ...row.series.map(o => {const newO = {}; newO[o.component] = o.enroll_total; return newO;}))
+        }})
+    }
 ].forEach(route => {
     app.get(route.path, async (req, res) => {
         try {
@@ -91,6 +98,18 @@ app.get('/api/check', (req, res) => {
             body => body.subject,
             body => body.code
         ]
+    },
+    {
+        path: '/api/chart3',
+        sqlParams: [
+            body => body.subject,
+            body => body.code,
+            body => body.component
+        ],
+        callback: rows => rows.map(row => { return {
+            name: row.name,
+            ...Object.assign({}, ...row.series.map(o => {const newO = {}; newO[o.component] = o.enroll_total; return newO;}))
+        }})
     },
     {
         path: '/api/course_changes',

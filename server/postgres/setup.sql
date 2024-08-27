@@ -1,5 +1,6 @@
 -- code to setup the db structure, should only be run once
 
+DROP MATERIALIZED VIEW section_changes;
 DROP MATERIALIZED VIEW course_changes;
 DROP TABLE timeslots;
 DROP TABLE enrollment;
@@ -281,4 +282,27 @@ FROM(
 	)
 	GROUP BY course_subject, course_code
 )
-ORDER BY 1, 2;
+ORDER BY subject, code;
+
+CREATE MATERIALIZED VIEW section_changes AS
+SELECT *,
+	curr_enroll_total - prev_day_enroll_total as day_change,
+    curr_enroll_total - prev_week_enroll_total as week_change,
+    curr_enroll_total - prev_month_enroll_total as month_change
+FROM(
+	SELECT course_subject, course_code, component,
+		t1.enroll_total::integer as curr_enroll_total,
+		t2.enroll_total::integer as prev_day_enroll_total,
+		t3.enroll_total::integer as prev_week_enroll_total,
+		t4.enroll_total::integer as prev_month_enroll_total
+	FROM sections
+	INNER JOIN enrollment t1
+	ON sections.section_id = t1.section_id AND t1.check_time = date_trunc('day', NOW())
+	LEFT OUTER JOIN enrollment t2
+	ON sections.section_id = t2.section_id AND t2.check_time = date_trunc('day', NOW() - '1 day'::interval)
+	LEFT OUTER JOIN enrollment t3
+	ON sections.section_id = t3.section_id AND t3.check_time = date_trunc('day', NOW() - '1 week'::interval)
+	LEFT OUTER JOIN enrollment t4
+	ON sections.section_id = t4.section_id AND t4.check_time = date_trunc('day', NOW() - '1 month'::interval)
+)
+ORDER BY course_subject, course_code, LEFT(component, 3) = 'TST', component;
