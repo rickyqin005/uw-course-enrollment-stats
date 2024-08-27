@@ -15,7 +15,8 @@ export default function App() {
 		}).then(res => res.json())
 		.then(data => {
 			const map = new Map();
-			data.subjects.forEach(subject => map.set(subject.subject, subject.course_codes));
+			data.subjects.filter(subject => subject.course_codes.length > 0)
+			.forEach(subject => map.set(subject.subject, subject.course_codes));
 			setCourseCodes(map);
 			setComponents(data.components);
 		}).catch(error => console.log(error));
@@ -27,7 +28,6 @@ export default function App() {
 			<h1>UW Course Enrollment Stats</h1>
 			<FrequencyChart courseCodes={courseCodes} components={components} />
 			<EnrollmentChart courseCodes={courseCodes} />
-			<h2>Which courses are taken the most?</h2>
 			<CoursesTable />
 		</div>
 		</div>

@@ -27,10 +27,17 @@ export default function EnrollmentChart({ courseCodes }) {
         })
         .then(res => res.json())
         .then(data => {
-            setChartData(data.map(row => { return {
-                enrollment: row.enrollment,
-                name: moment(row.name).subtract(moment().utcOffset(), 'minutes').format('MMM D')
-            };}));
+            if(data.length > 0) {
+                let currDay = moment(data[data.length-1].name).add(1, 'days');
+                const lastDay = moment("2024-09-30T04:00:00.000Z");
+                while(currDay.isSameOrBefore(lastDay)) {
+                    data.push({
+                        name: currDay.toISOString()
+                    });
+                    currDay.add(1, 'days');
+                }
+            }
+            setChartData(data);
             setChartDataLoading(false);
         })
         .catch(error => console.log(error));
@@ -52,23 +59,30 @@ export default function EnrollmentChart({ courseCodes }) {
               defaultValue={{ value: '99', label: '99' }}
               onChange={code => setChartCodeSelected(code.value)}/>
         </div>
-        <div className="chart-container" style={{ width: 'max(min(60vw, 1200px), 600px)' }}>
+        <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={chartData}
                     style={{ opacity: (chartDataLoading ? 0.25 : 1) }}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="2" />
-                    <XAxis dataKey="name" />
-                    <YAxis label={{ value: "# of Students", angle: -90, position: "left" }}
+                    <XAxis type='category' dataKey="name"
+                        tickFormatter={val => toDateString(val)}/>
+                    <YAxis type='number' label={{ value: "# of Students", angle: -90, position: "left" }}
                         domain={['auto', 'auto']}
                         allowDecimals={false}
                         tickFormatter={val => val.toLocaleString()} />
-                    <Tooltip />
+                    <Tooltip 
+                        formatter={val => val.toLocaleString()}
+                        labelFormatter={val => toDateString(val)} />
                     <Legend />
                     <Line type="monotone" name={`${chartSubjectSelected} ${chartCodeSelected}`} dataKey="enrollment" stroke="Black" />
                 </LineChart>
             </ResponsiveContainer>
         </div>
     </div>
+}
+
+function toDateString(val): string {
+    return moment(val).subtract(moment().utcOffset(), 'minutes').format('MMM D');
 }

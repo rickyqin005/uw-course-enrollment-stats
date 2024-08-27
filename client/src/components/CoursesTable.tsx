@@ -14,7 +14,7 @@ type Data = {
 };
 
 const headersConst = [
-    { Header: 'Rank', accessor: 'rank', style: { rowSpan: 2, textAlign: 'left', paddingLeft: '20px', paddingRight: '40px', paddingBottom: '8px' } },
+    { Header: 'Rank', accessor: 'rank', style: { rowSpan: 2, textAlign: 'left', paddingLeft: '20px', paddingRight: '30px', paddingBottom: '8px' } },
     { Header: 'Course', accessor: 'subject', style: { rowSpan: 2, textAlign: 'left', paddingRight: '10px', paddingBottom: '8px' } },
     { Header: ' ', accessor: 'code', style: { rowSpan: 2 } },
     { Header: 'Title', accessor: 'title', style: { rowSpan: 2, textAlign: 'left', paddingRight: '20px', paddingBottom: '8px' } },
@@ -90,10 +90,11 @@ export default function CoursesTable() {
         setPageSize,
         state: { pageIndex, pageSize },
     } = useTable({ columns: headers, data,
-            initialState: { pageSize: 50 }
+            initialState: { pageSize: 20 }
         }, useSortBy, usePagination);
     
     return (<>
+        <h2>Which courses are taken the most?</h2>
         <div className="pagination">
             <div>
                 <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>

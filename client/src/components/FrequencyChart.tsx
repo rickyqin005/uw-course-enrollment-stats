@@ -85,7 +85,8 @@ export default function FrequencyChart({ courseCodes, components }) {
                     <YAxis label={{ value: "# of Students", angle: -90, position: "left" }}
                         tickCount={6}
                         tickFormatter={val => val.toLocaleString()} />
-                    <Tooltip />
+                    <Tooltip
+                        formatter={val => val.toLocaleString()} />
                     <Legend />
                     <Line type="monotone" dataKey="Monday" stroke="blue" />
                     <Line type="monotone" dataKey="Tuesday" stroke="red" />
