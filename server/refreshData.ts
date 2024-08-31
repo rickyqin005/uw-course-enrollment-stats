@@ -91,7 +91,6 @@ export default async function refreshData() {
                             console.assert(element.children.length == 12);
                             enrollment.push([
                                 code,                                                                       // section_id
-                                currDate.toISOString(),                                                     // check_time
                                 parseInt($(element).children(':nth-child(8)').text()) || 0                  // enroll_total
                             ])
                             sections.push([

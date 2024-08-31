@@ -234,7 +234,7 @@ CREATE TABLE sections (
 
 CREATE TABLE enrollment (
     section_id      INT         NOT NULL REFERENCES sections(section_id),
-    check_time      TIMESTAMP   NOT NULL CHECK(extract(min FROM check_time) = 0 AND extract(sec FROM check_time) = 0),
+    check_time      TIMESTAMP   NOT NULL CHECK(check_time = date_trunc('day', check_time)) DEFAULT date_trunc('day', NOW()::timestamp),
     enroll_total    INT         NOT NULL CHECK(enroll_total >= 0),
     PRIMARY KEY(section_id, check_time)
 );

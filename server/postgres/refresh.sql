@@ -11,7 +11,7 @@ ON CONFLICT(section_id) DO UPDATE SET
     location = excluded.location,
     enroll_cap = excluded.enroll_cap;
 
-INSERT INTO enrollment VALUES %SQL3
+INSERT INTO enrollment(section_id, enroll_total) VALUES %SQL3
 ON CONFLICT(section_id, check_time) DO UPDATE SET
     enroll_total = excluded.enroll_total;
 
