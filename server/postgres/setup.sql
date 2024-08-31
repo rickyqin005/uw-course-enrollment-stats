@@ -241,9 +241,8 @@ CREATE TABLE enrollment (
 	
 CREATE TABLE timeslots (
     section_id      INT         NOT NULL REFERENCES sections(section_id),
-    start_time      TIMESTAMP   CHECK('1899-12-31 08:30'::timestamp <= start_time),
-    end_time        TIMESTAMP   CHECK(end_time <= '1899-12-31 22:00'::timestamp AND start_time < end_time AND
-                                    ((start_time IS NOT NULL AND end_time IS NOT NULL) OR (start_time IS NULL AND end_time IS NULL))),
+    start_time      TIMESTAMP   NOT NULL CHECK('1899-12-31 08:30'::timestamp <= start_time),
+    end_time        TIMESTAMP   NOT NULL CHECK(end_time <= '1899-12-31 22:00'::timestamp AND start_time < end_time),
     -- encodes which days of the week a timeslot runs as bits: 1 Mon, 2 Tue, 4 Wed, 8 Thu, ...
     days_of_week    INT         NOT NULL CHECK(days_of_week BETWEEN 0 AND 127),
     start_date      DATE,

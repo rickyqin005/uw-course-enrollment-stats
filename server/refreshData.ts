@@ -106,11 +106,11 @@ export default async function refreshData() {
                         if(timeStr != '') {
                             timeslots.push([
                                 sections[sections.length-1][0],// section_id
-                                startTime,// start_time
-                                endTime,// end_time
+                                startTime.toISOString().slice(0,16),// start_time
+                                endTime.toISOString().slice(0,16),// end_time
                                 daysOfWeek,// days_of_week
-                                startDate,// start_date
-                                endDate// end_date
+                                startDate?.toISOString().slice(0,10),// start_date
+                                endDate?.toISOString().slice(0,10)// end_date
                             ]);
                         }
                     });

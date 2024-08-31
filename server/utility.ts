@@ -20,8 +20,8 @@ export function arrsFormat(arrs: any[]): string {
             if(typeof element === 'string' || element instanceof String) return `'${element.replace('\'', '\'\'')}'`;
             if(element instanceof Date) return `'${element.toISOString()}'`;
             return element.toString().replace('\'', '\'\'');
-        }).join(', ')})`
-    ).join(',\n');
+        }).join(',')})`
+    ).join(',');
 }
 
 export function formatSQL(path: string, ...args: string[]): string {
