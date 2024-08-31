@@ -1,7 +1,10 @@
 import React from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import ChartOption from './ChartOption.tsx';
+import { CourseOptions } from './types.ts';
 const moment = require('moment');
+
+const consts = require('../const.json');
 
 interface TimeFrame {
     name: string,
@@ -10,12 +13,12 @@ interface TimeFrame {
 
 const lineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'BlueViolet', 'Maroon', 'Olive', 'Magenta', 'Teal', 'MidnightBlue'];
 
-export default function EnrollmentChart2({ courseCodes, components }) {
+export default function EnrollmentChart2({ courseOptions }: { courseOptions: CourseOptions }) {
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
-    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<String>('MATH');
-    const [chartCodeSelected, setChartCodeSelected] = React.useState<String>('137');
-    const [chartComponentSelected, setChartComponentSelected] = React.useState<String>('LEC');
+    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<string>(consts.defaultSubjectSelected);
+    const [chartCodeSelected, setChartCodeSelected] = React.useState<string>(consts.defaultCodeSelected);
+    const [chartComponentSelected, setChartComponentSelected] = React.useState<string>(consts.defaultComponentSelected);
 
     React.useEffect(() => {
         console.log(`chart3 options: ${chartSubjectSelected}|${chartCodeSelected}|${chartComponentSelected}`);
@@ -50,21 +53,33 @@ export default function EnrollmentChart2({ courseCodes, components }) {
         <div className="chart-options">
         <ChartOption
             name="Subject:"
-            options={Array.from(courseCodes.keys()).map(subject => { return { value: subject, label: subject }})}
+            value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
+            options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
             isMultiSelect={false}
-            defaultValue={{ value: 'MATH', label: 'MATH' }}
-            onChange={subject => setChartSubjectSelected(subject.value)}/>
+            onChange={subject => {
+                setChartSubjectSelected(subject.value);
+                const newCode = (courseOptions.get(subject.value) ?? new Map()).entries().next().value[0];
+                const newComponent = ((courseOptions.get(subject.value) ?? new Map()).get(newCode) ?? new Map()).entries().next().value[1];
+                setChartCodeSelected(newCode);
+                setChartComponentSelected(newComponent);
+            }}/>
         <ChartOption
             name="Code:"
-            options={(courseCodes.get(chartSubjectSelected) ?? []).map(code => { return { value: code, label: code }})}
+            value={{ value: chartCodeSelected, label: chartCodeSelected }}
+            options={Array.from((courseOptions.get(chartSubjectSelected) ?? new Map()).keys())
+                .map(course => { return { value: course, label: course }})}
             isMultiSelect={false}
-            defaultValue={{ value: '137', label: '137' }}
-            onChange={code => setChartCodeSelected(code.value)}/>
+            onChange={code => {
+                setChartCodeSelected(code.value);
+                const newComponent = ((courseOptions.get(chartSubjectSelected) ?? new Map()).get(code.value) ?? new Map()).entries().next().value[1];
+                setChartComponentSelected(newComponent);
+            }}/>
         <ChartOption
             name="Component:"
-            options={components.map(component => { return { value: component, label: component }})}
+            value={{ value: chartComponentSelected, label: chartComponentSelected }}
+            options={(courseOptions.get(chartSubjectSelected)?.get(chartCodeSelected) ?? [])
+                .map(component => { return { value: component, label: component }})}
             isMultiSelect={false}
-            defaultValue={[{ value: 'LEC', label: 'LEC' }]}
             onChange={component => setChartComponentSelected(component.value)}/>
         </div>
         <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
@@ -76,7 +91,7 @@ export default function EnrollmentChart2({ courseCodes, components }) {
                     <CartesianGrid strokeDasharray="2" />
                     <XAxis type='category' dataKey="name"
                         tickFormatter={val => toDateString(val)}/>
-                    <YAxis type='number' label={{ value: "# of Students", angle: -90, position: "left" }}
+                    <YAxis type='number' label={{ value: "% of Capacity", angle: -90, position: "left" }}
                         domain={([dataMin, dataMax]) => [Math.floor(dataMin*10)/10, Math.ceil(dataMax*10)/10]}
                         allowDecimals={true}
                         tickFormatter={val => toPercentString(val)} />
@@ -88,7 +103,8 @@ export default function EnrollmentChart2({ courseCodes, components }) {
                     {chartData.length > 0 ? 
                         Object.keys(chartData[0]).slice(1).map((series, idx) =>
                             <Line type="monotone" name={series} dataKey={series}
-                                stroke={idx < lineColors.length ? lineColors[idx] : `#${Math.floor(Math.random()*256*256*256).toString(16).padStart(6,'0')}`}
+                                stroke={idx < lineColors.length ? lineColors[idx] :
+                                    `#${Math.floor(Math.random()*256*256*256).toString(16).padStart(6,'0')}`}
                                 strokeWidth={2} />
                         ) : ''}
                     

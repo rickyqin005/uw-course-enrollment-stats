@@ -1,18 +1,21 @@
 import React from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import ChartOption from './ChartOption.tsx';
+import { CourseOptions } from './types.ts';
 const moment = require('moment');
+
+const consts = require('../const.json');
 
 interface TimeFrame {
     name: string,
     enrollment: number
 }
 
-export default function EnrollmentChart({ courseCodes }) {
+export default function EnrollmentChart({ courseOptions }: { courseOptions: CourseOptions }) {
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
-    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<String>('MTHEL');
-    const [chartCodeSelected, setChartCodeSelected] = React.useState<String>('99');
+    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<string>(consts.defaultSubjectSelected);
+    const [chartCodeSelected, setChartCodeSelected] = React.useState<string>(consts.defaultCodeSelected);
 
     React.useEffect(() => {
         console.log(`chart2 options: ${chartSubjectSelected}|${chartCodeSelected}`);
@@ -45,17 +48,21 @@ export default function EnrollmentChart({ courseCodes }) {
         <h2>How does course enrollment change over time?</h2>
         <div className="chart-options">
         <ChartOption
-              name="Subject:"
-              options={Array.from(courseCodes.keys()).map(subject => { return { value: subject, label: subject }})}
-              isMultiSelect={false}
-              defaultValue={{ value: 'MTHEL', label: 'MTHEL' }}
-              onChange={subject => setChartSubjectSelected(subject.value)}/>
+            name="Subject:"
+            value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
+            options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
+            isMultiSelect={false}
+            onChange={subject => {
+                setChartSubjectSelected(subject.value);
+                setChartCodeSelected((courseOptions.get(subject.value) ?? new Map()).entries().next().value[0]);
+            }}/>
         <ChartOption
-              name="Code:"
-              options={(courseCodes.get(chartSubjectSelected) ?? []).map(code => { return { value: code, label: code }})}
-              isMultiSelect={false}
-              defaultValue={{ value: '99', label: '99' }}
-              onChange={code => setChartCodeSelected(code.value)}/>
+            name="Code:"
+            value={{ value: chartCodeSelected, label: chartCodeSelected }}
+            options={Array.from((courseOptions.get(chartSubjectSelected) ?? new Map()).keys())
+                .map(course => { return { value: course, label: course }})}
+            isMultiSelect={false}
+            onChange={code => setChartCodeSelected(code.value)}/>
         </div>
         <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
             {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}

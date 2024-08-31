@@ -1,6 +1,7 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import ChartOption from "./ChartOption.tsx";
+import { CourseOptions } from "./types.ts";
 const moment = require('moment');
 
 const staticData = require('../const.json');
@@ -23,7 +24,7 @@ interface TimeFrame {
     Friday: number
 }
 
-export default function FrequencyChart({ courseCodes, components }) {
+export default function FrequencyChart({ courseOptions, components }: { courseOptions: CourseOptions, components: string[] }) {
         
     const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
     const [chartDataLoading, setChartDataLoading] = React.useState(false);
@@ -57,7 +58,7 @@ export default function FrequencyChart({ courseCodes, components }) {
         <div className="chart-options">
         <ChartOption
             name="Subject:"
-            options={Array.from(courseCodes.keys()).map(subject => { return { value: subject, label: subject }})}
+            options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
             isMultiSelect={true}
             defaultValue={[]}
             onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>

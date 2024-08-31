@@ -4,10 +4,14 @@ import FrequencyChart from "./components/FrequencyChart.tsx";
 import CoursesTable from "./components/CoursesTable.tsx";
 import EnrollmentChart from "./components/EnrollmentChart.tsx";
 import EnrollmentChart2 from "./components/EnrollmentChart2.tsx";
+import { CourseOptions, CourseOptionsRaw } from "./components/types.ts";
+
+const consts = require('./const.json');
 
 export default function App() {
-	const [courseCodes, setCourseCodes] = React.useState<Map<String, String[]>>(new Map([['MTHEL', ['99']]]));
-	const [components, setComponents] = React.useState<String[]>([]);
+	const [courseOptions, setCourseOptions] = React.useState<CourseOptions>
+		(parseCourseOptions(consts.defaultOptions));
+	const [components, setComponents] = React.useState<string[]>([]);
 
 	React.useEffect(() => {
 		fetch(`${process.env.REACT_APP_SERVER_URL}/api/info`, {
@@ -15,10 +19,7 @@ export default function App() {
 			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
 		}).then(res => res.json())
 		.then(data => {
-			const map = new Map();
-			data.subjects.filter(subject => subject.course_codes.length > 0)
-			.forEach(subject => map.set(subject.subject, subject.course_codes));
-			setCourseCodes(map);
+			setCourseOptions(parseCourseOptions(data));
 			setComponents(data.components);
 		}).catch(error => console.log(error));
 	}, []);
@@ -27,11 +28,18 @@ export default function App() {
 		<div className="App">
 		<div className="App-body">
 			<h1>UW Course Enrollment Stats</h1>
-			<FrequencyChart courseCodes={courseCodes} components={components} />
-			<EnrollmentChart courseCodes={courseCodes} />
-			<EnrollmentChart2 courseCodes={courseCodes} components={components} />
+			<FrequencyChart courseOptions={courseOptions} components={components} />
+			<EnrollmentChart courseOptions={courseOptions} />
+			<EnrollmentChart2 courseOptions={courseOptions} />
 			<CoursesTable />
 		</div>
 		</div>
 	);
+}
+
+function parseCourseOptions(options: CourseOptionsRaw): CourseOptions {
+	return new Map(options.subjects.filter(subject => subject.courses.length > 0)
+	.map(subject => [
+		subject.subject, new Map(subject.courses.map(course => [course.code, course.components]))
+	]))
 }

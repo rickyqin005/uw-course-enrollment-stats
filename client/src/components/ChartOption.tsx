@@ -1,14 +1,14 @@
 import React from 'react';
 import Select from 'react-select';
 
-export default function ChartOption({ name, options, isMultiSelect, defaultValue, onChange }:
-    { name: string, options: { value: any, label: any }[], isMultiSelect: boolean | undefined,
-    defaultValue: any, onChange: (arg0: any) => void }) {
+export default function ChartOption({ name, value, options, isMultiSelect, onChange }:
+    { name: string, value: { value: any, label: any } | undefined, options: { value: any, label: any }[],
+    isMultiSelect: boolean | undefined, onChange: (arg0: any) => void }) {
 
     return <div className="option-container">
         <div className="option-name">{name}</div>
         <Select
-        defaultValue={defaultValue}
+        value={value}
         isMulti={isMultiSelect}
         options={options}
         className="basic-multi-select"
