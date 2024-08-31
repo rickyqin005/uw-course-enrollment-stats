@@ -19,3 +19,4 @@ DELETE FROM timeslots;
 INSERT INTO timeslots VALUES %SQL4;
 
 REFRESH MATERIALIZED VIEW course_changes;
+REFRESH MATERIALIZED VIEW section_changes;

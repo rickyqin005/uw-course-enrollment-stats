@@ -1,5 +1,27 @@
 {
     "firstWeek": "1900-09-02",
-    "lastWeek": "1900-12-16",
-    "defaultWeekIndex": 1
+    "lastWeek": "1900-12-02",
+    "defaultWeekIndex": 1,
+    "defaultOptions": {
+        "subjects": [
+            {
+                "subject": "MATH",
+                "faculty": "Math",
+                "courses": [
+                    {
+                        "code": "137",
+                        "components": [
+                            "LEC",
+                            "TUT",
+                            "TST"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "components": []
+    },
+    "defaultSubjectSelected": "MATH",
+    "defaultCodeSelected": "137",
+    "defaultComponentSelected": "LEC"
 }

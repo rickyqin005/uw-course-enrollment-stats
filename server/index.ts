@@ -136,7 +136,7 @@ app.get('/api/check', (req, res) => {
 
 //<------------------------------------------------------------------------------------------------->
 
-// refresh every 15 minutes
+// refresh every 30 minutes
 refreshData();
 setInterval(() => {
     refreshData()
