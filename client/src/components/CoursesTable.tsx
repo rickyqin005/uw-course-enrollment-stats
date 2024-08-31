@@ -1,16 +1,17 @@
 import React from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
+import { ValueAndLabel } from './types';
+import useAPI from '../hooks/useAPI.ts';
 
-type ValueAndLabel = { value: any, label: String };
 type Data = {
     rank: number,
     subject: string,
     code: string,
     title: string,
     curr_enroll_total: number,
-    day_change: ValueAndLabel,
-    week_change: ValueAndLabel,
-    month_change: ValueAndLabel
+    day_change: ValueAndLabel<number>,
+    week_change: ValueAndLabel<number>,
+    month_change: ValueAndLabel<number>
 };
 
 const headersConst = [
@@ -45,31 +46,16 @@ const columns = [
 ];
 
 export default function CoursesTable() {
-    const [data, setData] = React.useState<Data[]>([]);
-    
-    React.useEffect(() => {
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/course_changes`, {
-            method: "POST",
-            mode: 'cors',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                order_by: [{ col: 'curr_enroll_total', order: false }, { col: 'courses.subject' }, { col: 'courses.code' }]
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            setData(data.map((row, idx) => {
-                return {
-                    ...row,
-                    rank: idx+1,
-                    day_change: { value: (row.day_change ?? 0), label: formatChange(row.day_change ?? 0) },
-                    week_change: { value: (row.week_change ?? 0), label: formatChange(row.week_change ?? 0) },
-                    month_change: { value: (row.month_change ?? 0), label: formatChange(row.month_change ?? 0) }
-                };
-            }))
-        })
-        .catch(error => console.log(error));
-    }, []);
+    const { data } = useAPI<Data[]>('/api/course_changes', {}, [],
+    data => data.map((row, idx) => {
+        return {
+            ...row,
+            rank: idx+1,
+            day_change: { value: (row.day_change ?? 0), label: formatChange(row.day_change ?? 0) },
+            week_change: { value: (row.week_change ?? 0), label: formatChange(row.week_change ?? 0) },
+            month_change: { value: (row.month_change ?? 0), label: formatChange(row.month_change ?? 0) }
+        };
+    }), []);
 
     const headers = React.useMemo(() => headersConst, [])
 

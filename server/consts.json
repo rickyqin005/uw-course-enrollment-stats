@@ -1,4 +1,8 @@
 {
+    "defaultWeek": "1900-09-09T00:00:00.000Z",
+    "defaultSubjectSelected": "MATH",
+    "defaultCodeSelected": "137",
+    "defaultComponentSelected": "LEC",
     "subjects": [
         "ACC",
         "ACINTY",
@@ -175,62 +179,5 @@
         "WKRPT",
         "WS",
         "YC"
-    ],
-    "courseComponents": [
-        "LEC",
-        "TUT",
-        "LAB",
-        "TST",
-        "CLN",
-        "DIS",
-        "ENS",
-        "ESS",
-        "FLD",
-        "FLT",
-        "OLN",
-        "ORL",
-        "PRA",
-        "PRJ",
-        "RDG",
-        "SEM",
-        "STU",
-        "WRK",
-        "WSP"
-    ],
-    "daysOfWeekAbbrev": [
-        "M",
-        "T",
-        "W",
-        "Th",
-        "F",
-        "S",
-        "U"
-    ],
-    "daysOfWeekFullName": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday"
-    ],
-    "monthsShortName": [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec"
-    ],
-    "firstWeek": "1900-09-02T00:00:00.000Z",
-    "lastWeek": "1900-12-16T00:00:00.000Z",
-    "defaultWeek": "1900-09-09T00:00:00.000Z",
-    "defaultWeekIndex": 1
+    ]
 }

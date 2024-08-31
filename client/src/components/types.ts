@@ -1,3 +1,5 @@
+export type ValueAndLabel<T> = { value: T, label: String };
+
 export type CourseOptions = Map<string, Map<string, string[]>>;
 
 export type CourseOptionsRaw = {
@@ -7,6 +9,5 @@ export type CourseOptionsRaw = {
 			code: string,
 			components: string[]
 		}[]
-	}[],
-	components: string[]
+	}[]
 };

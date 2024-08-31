@@ -5,32 +5,22 @@ import CoursesTable from "./components/CoursesTable.tsx";
 import EnrollmentChart from "./components/EnrollmentChart.tsx";
 import EnrollmentChart2 from "./components/EnrollmentChart2.tsx";
 import { CourseOptions, CourseOptionsRaw } from "./components/types.ts";
+import useAPI from "./hooks/useAPI.ts";
 
-const consts = require('./const.json');
+const consts = require('./consts.json');
+const components = consts.components;
 
 export default function App() {
-	const [courseOptions, setCourseOptions] = React.useState<CourseOptions>
-		(parseCourseOptions(consts.defaultOptions));
-	const [components, setComponents] = React.useState<string[]>([]);
-
-	React.useEffect(() => {
-		fetch(`${process.env.REACT_APP_SERVER_URL}/api/info`, {
-			method: "GET", mode: 'cors',
-			headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-		}).then(res => res.json())
-		.then(data => {
-			setCourseOptions(parseCourseOptions(data));
-			setComponents(data.components);
-		}).catch(error => console.log(error));
-	}, []);
+	const { data } = useAPI<CourseOptions>
+		('/api/info', {}, parseCourseOptions(consts.defaultCourseOptions), parseCourseOptions, []);
 
 	return (
 		<div className="App">
 		<div className="App-body">
 			<h1>UW Course Enrollment Stats</h1>
-			<FrequencyChart courseOptions={courseOptions} components={components} />
-			<EnrollmentChart courseOptions={courseOptions} />
-			<EnrollmentChart2 courseOptions={courseOptions} />
+			<FrequencyChart courseOptions={data} components={components} />
+			<EnrollmentChart courseOptions={data} />
+			<EnrollmentChart2 courseOptions={data} />
 			<CoursesTable />
 		</div>
 		</div>

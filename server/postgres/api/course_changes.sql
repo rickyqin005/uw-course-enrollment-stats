@@ -8,4 +8,4 @@ SELECT
 FROM courses
 INNER JOIN course_changes
 ON course_changes.subject = courses.subject AND course_changes.code = courses.code
-ORDER BY %SQL1;
+ORDER BY curr_enroll_total DESC, courses.subject, courses.code;

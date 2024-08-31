@@ -1,12 +1,13 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import ChartOption from "./ChartOption.tsx";
-import { CourseOptions } from "./types.ts";
+import { CourseOptions, ValueAndLabel } from "./types.ts";
+import useAPI from "../hooks/useAPI.ts";
 const moment = require('moment');
 
-const staticData = require('../const.json');
+const staticData = require('../consts.json');
 let currWeek = moment(staticData.firstWeek);
-const weeksList: {value: string, label: string }[] = [];
+const weeksList: ValueAndLabel<string>[] = [];
 while(currWeek.isSameOrBefore(moment(staticData.lastWeek))) {
     weeksList.push({
         value: currWeek.toISOString(),
@@ -25,61 +26,44 @@ interface TimeFrame {
 }
 
 export default function FrequencyChart({ courseOptions, components }: { courseOptions: CourseOptions, components: string[] }) {
-        
-    const [chartData, setChartData] = React.useState<TimeFrame[]>([]);
-    const [chartDataLoading, setChartDataLoading] = React.useState(false);
     const [chartSubjectsSelected, setChartSubjectsSelected] = React.useState<string[]>([]);
     const [chartComponentsSelected, setChartComponentsSelected] = React.useState<string[]>([]);
-    const [chartWeekSelected, setChartWeekSelected] = React.useState<string>(weeksList[1].value);
+    const [chartWeekSelected, setChartWeekSelected] = React.useState<ValueAndLabel<string>>(weeksList[1]);
 
-    React.useEffect(() => {
-        console.log(`chart1 options: ${chartSubjectsSelected}|${chartComponentsSelected}|${chartWeekSelected}`);
-        setChartDataLoading(true);
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/chart1`, {
-            method: "POST",
-            mode: 'cors',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                subjects: chartSubjectsSelected,
-                components: chartComponentsSelected,
-                week: chartWeekSelected
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            setChartData(data);
-            setChartDataLoading(false);
-        })
-        .catch(error => console.log(error));
-    }, [chartSubjectsSelected, chartComponentsSelected, chartWeekSelected]);
+    const { data, dataIsLoaded } = useAPI<TimeFrame[]>('/api/chart1', {
+        subjects: chartSubjectsSelected,
+        components: chartComponentsSelected,
+        week: chartWeekSelected.value
+    }, [], data => data,
+    [chartSubjectsSelected, chartComponentsSelected, chartWeekSelected]);
     
     return <div className="chart-region">
         <h2>When do people usually have classes?</h2>
         <div className="chart-options">
         <ChartOption
             name="Subject:"
+            value={undefined}
             options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
             isMultiSelect={true}
-            defaultValue={[]}
             onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>
         <ChartOption
             name="Component:"
+            value={undefined}
             options={components.map(component => { return { value: component, label: component }})}
             isMultiSelect={true}
-            defaultValue={[]}
             onChange={components => setChartComponentsSelected(components.map(component => component.value))}/>
         <ChartOption
             name="Week of:"
+            value={chartWeekSelected}
             options={weeksList}
             isMultiSelect={false}
-            defaultValue={weeksList[staticData.defaultWeekIndex]}
-            onChange={week => setChartWeekSelected(week.value)}/>
+            onChange={week => setChartWeekSelected(week)}/>
         </div>
         <div className="chart-container" style={{ width: 'max(min(70vw, 1200px), 700px)' }}>
-            {chartDataLoading ? <div className="chart-loading">Loading...</div> : ''}
+            {!dataIsLoaded ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
-                <LineChart data={chartData}
-                    style={{ opacity: (chartDataLoading ? 0.25 : 1) }}
+                <LineChart data={data}
+                    style={{ opacity: (!dataIsLoaded ? 0.25 : 1) }}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="2" />
                     <XAxis dataKey="name" />

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const staticData = require('./data.json');
+const staticData = require('./consts.json');
 import { createPGClient, formatSQL, log } from './utility';
 import refreshData from './refreshData';
 
@@ -45,23 +45,38 @@ app.get('/api/check', (req, res) => {
     },
     { path: '/api/courses' },
     { path: '/api/sections' },
-    {
-        path: '/api/course_changes',
-        sqlParams: ['courses.subject, courses.code']
-    },
+    { path: '/api/course_changes' },
     { path: '/api/section_changes' },
     {
         path: '/api/chart1',
-        sqlParams: ['', '', `'${staticData.defaultWeek.slice(0,10)}'`],
+        defaultParams: {
+            subjects: [],
+            components: [],
+            week: staticData.defaultWeek
+        },
+        toSQLParams: params => {return {
+            subjects: params.subjects.length > 0 ? `AND course_subject IN (${params.subjects.map(s => `'${s}'`).join(', ')})` : '',
+            components: params.components.length > 0 ? `AND LEFT(component, 3) IN (${params.components.map(s => `'${s}'`).join(', ')})` : '',
+            week: `${params.week.slice(0,10)}`
+        }},
         callback: rows => rows.map(row => row.time_frame)
     },
     {
         path: '/api/chart2',
-        sqlParams: ['MTHEL', '99']
+        defaultParams: {
+            subject: staticData.defaultSubjectSelected,
+            code: staticData.defaultCodeSelected
+        },
+        toSQLParams: params => params
     },
     {
         path: '/api/chart3',
-        sqlParams: ['MATH', '137', 'LEC'],
+        defaultParams: {
+            subject: staticData.defaultSubjectSelected,
+            code: staticData.defaultCodeSelected,
+            component: staticData.defaultComponentSelected
+        },
+        toSQLParams: params => params,
         callback: rows => rows.map(row => { return {
             name: row.name,
             ...Object.assign({}, ...row.series.map(o => {const newO = {}; newO[o.component] = o.enroll_total; return newO;}))
@@ -70,63 +85,16 @@ app.get('/api/check', (req, res) => {
 ].forEach(route => {
     app.get(route.path, async (req, res) => {
         try {
+            log(`GET ${req.path} ${JSON.stringify(req.query.params ?? {})}`);
+            let SQLParams: string[] = [];
+            if(route.defaultParams) {
+                const reqParams = { ...route.defaultParams, ...JSON.parse(req.query.params ?? "{}") };
+                SQLParams = Object.values(route.toSQLParams(reqParams));
+            }
             const pgClient = createPGClient();
             await pgClient.connect();
-            log(`GET ${req.path}`);
-            const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...(route.sqlParams ?? [])));
+            const dbRes = await pgClient.query(formatSQL(`./postgres${route.path}.sql`, ...SQLParams));
             res.json((route.callback ?? (rows => rows))(dbRes.rows));
-            await pgClient.end();
-        } catch(error) {
-            log(error);
-        }
-    });
-});
-
-[
-    {
-        path: '/api/chart1',
-        sqlParams: [
-            body => (body.subjects != undefined && body.subjects.length > 0) ? `AND course_subject IN (${body.subjects.map(s => `'${s}'`).join(', ')})` : '',
-            body => (body.components != undefined && body.components.length > 0) ? `AND LEFT(component, 3) IN (${body.components.map(s => `'${s}'`).join(', ')})` : '',
-            body => `'${body.week.slice(0,10)}'`
-        ],
-        callback: rows => rows.map(row => row.time_frame)
-    },
-    {
-        path: '/api/chart2',
-        sqlParams: [
-            body => body.subject,
-            body => body.code
-        ]
-    },
-    {
-        path: '/api/chart3',
-        sqlParams: [
-            body => body.subject,
-            body => body.code,
-            body => body.component
-        ],
-        callback: rows => rows.map(row => { return {
-            name: row.name,
-            ...Object.assign({}, ...row.series.map(o => {const newO = {}; newO[o.component] = o.enroll_total; return newO;}))
-        }})
-    },
-    {
-        path: '/api/course_changes',
-        sqlParams: [
-            body => (body.order_by != undefined && body.order_by.length > 0) ?
-                `${body.order_by.map(e => `${e.col}${e.order != undefined && !e.order ? ' DESC' : ''}`).join(', ')}` : 'subject, code'
-        ]
-    }
-].forEach(route => {
-    app.post(route.path, async (req, res) => {
-        try {
-            const pgClient = createPGClient();
-            await pgClient.connect();
-            log(`POST ${req.path}`);
-            const sqlStrs = route.sqlParams.map(func => func(req.body));
-            const dbRes = await pgClient.query(formatSQL(`./postgres${req.path}.sql`, ...sqlStrs));
-            res.json((route.callback ?? (r => r))(dbRes.rows));
             await pgClient.end();
         } catch(error) {
             log(error);

@@ -2,7 +2,7 @@
     "firstWeek": "1900-09-02",
     "lastWeek": "1900-12-02",
     "defaultWeekIndex": 1,
-    "defaultOptions": {
+    "defaultCourseOptions": {
         "subjects": [
             {
                 "subject": "MATH",
@@ -18,10 +18,30 @@
                     }
                 ]
             }
-        ],
-        "components": []
+        ]
     },
     "defaultSubjectSelected": "MATH",
     "defaultCodeSelected": "137",
-    "defaultComponentSelected": "LEC"
+    "defaultComponentSelected": "LEC",
+    "components": [
+        "LEC",
+        "TUT",
+        "LAB",
+        "TST",
+        "CLN",
+        "DIS",
+        "ENS",
+        "ESS",
+        "FLD",
+        "FLT",
+        "OLN",
+        "ORL",
+        "PRA",
+        "PRJ",
+        "RDG",
+        "SEM",
+        "STU",
+        "WRK",
+        "WSP"
+    ]
 }
