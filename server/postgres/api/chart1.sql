@@ -14,7 +14,8 @@ SELECT
 		ON timeslots.section_id = sections.section_id
 		WHERE
 			(start_time IS NULL OR
-				GREATEST(start_time, times) < LEAST(times + '30 min'::interval, end_time))
+				GREATEST(('1899-12-31 ' || start_time::varchar)::timestamp, times) <
+				LEAST(times + '30 min'::interval, ('1899-12-31 ' || end_time::varchar)::timestamp))
 			AND days_of_week & pow = pow
 			AND (start_date IS NULL OR
 				GREATEST(start_date, '%SQL3'::timestamp) <= LEAST('%SQL3'::timestamp + '7 days'::interval, end_date))
