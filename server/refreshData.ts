@@ -5,12 +5,19 @@ const cheerio = require("cheerio");
 const fs = require('fs');
 const path = require('path');
 
-const staticData = require('./consts.json');
-const subjects: string[] = staticData.subjects;
-const daysOfWeekAbbrev = ['M', 'T', 'W', 'Th', 'F', 'S', 'U'];
-import { createPGClient, arrsFormat, formatSQL } from './utility';
+import { createPGClient, arrsFormat, formatSQL, log } from './utility';
+const { subjects, daysOfWeekAbbrev } = require('./consts.json');
 
+// refresh every 30 minutes
 export default async function refreshData() {
+    refresh();
+    setInterval(() => {
+        refresh()
+        .catch(error => console.log(error));
+    }, 1800000);
+}
+
+async function refresh() {
     try {
         console.time("fetchData");
         const requests: Promise<any>[] = subjects.map(subject =>
@@ -45,14 +52,17 @@ export default async function refreshData() {
 
                         // skip cancelled sections
                         if($(element).children(':last-child').text() == 'Cancelled Section') {
+                            while(timeslots.length > 0 && timeslots.at(-1)[0] == sections.at(-1)[0]) {
+                                timeslots.pop();
+                            }
                             enrollment.pop();
                             sections.pop(); return;
                         }
 
-                        let code = parseInt($(element).children(':first-child').text());
-                        let dateArr: string[] = $(element).children(':nth-last-child(2)').html().split('<br>');
-                        let timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
-                        let dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr[1]) ? dateArr[1] : '');
+                        const code = parseInt($(element).children(':first-child').text());
+                        const dateArr: string[] = $(element).children(':nth-last-child(2)').html().split('<br>');
+                        const timeStr = (/^\d{2}:\d{2}-\d{2}:\d{2}\D+$/.test(dateArr[0]) ? dateArr[0] : '');
+                        const dateStr = (/^\d{2}\/\d{2}-\d{2}\/\d{2}$/.test(dateArr.at(-1)) ? dateArr.at(-1) : '');
 
                         let startTimeHours = 0, startTimeMinutes = 0;
                         let endTimeHours = 0, endTimeMinutes = 0;
@@ -97,17 +107,17 @@ export default async function refreshData() {
                             ])
                             sections.push([
                                 code,                                                                       // section_id
-                                courses[courses.length-1][0],                                               // course_subject
-                                courses[courses.length-1][1],                                               // course_code
+                                courses.at(-1)[0],                                               // course_subject
+                                courses.at(-1)[1],                                               // course_code
                                 $(element).children(':nth-child(2)').text().trim(),                         // component
                                 $(element).children(':nth-child(3)').text().trim().replace(/[\s]+/, ' '),   // location
                                 parseInt($(element).children(':nth-child(7)').text()) || 0,                 // enroll_cap
                             ]);
                         }
-                        
-                        if(timeStr != '') {
+
+                        if(timeStr != '' || dateStr != '') {
                             timeslots.push([
-                                sections[sections.length-1][0],// section_id
+                                sections.at(-1)[0],// section_id
                                 startTimeStr,// start_time
                                 endTimeStr,// end_time
                                 daysOfWeek,// days_of_week

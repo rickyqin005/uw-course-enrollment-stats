@@ -179,5 +179,14 @@
         "WKRPT",
         "WS",
         "YC"
+    ],
+    "daysOfWeekAbbrev": [
+        "M",
+        "T",
+        "W",
+        "Th",
+        "F",
+        "S",
+        "U"
     ]
 }

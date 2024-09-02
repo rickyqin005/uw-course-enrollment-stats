@@ -104,11 +104,6 @@ app.get('/api/check', (req, res) => {
 
 //<------------------------------------------------------------------------------------------------->
 
-// refresh every 30 minutes
 refreshData();
-setInterval(() => {
-    refreshData()
-    .catch(error => log(error));
-}, 1800000);
 
 // https://ucalendar.uwaterloo.ca/2425/COURSE/course-${subject}.html

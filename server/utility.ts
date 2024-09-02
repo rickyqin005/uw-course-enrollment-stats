@@ -21,7 +21,7 @@ export function arrsFormat(arrs: any[]): string {
             if(element instanceof Date) return `'${element.toISOString()}'`;
             return element.toString().replace('\'', '\'\'');
         }).join(',')})`
-    ).join(',');
+    ).join(',\n');
 }
 
 export function formatSQL(path: string, ...args: string[]): string {

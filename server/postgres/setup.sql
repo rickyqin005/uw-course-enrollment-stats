@@ -241,13 +241,15 @@ CREATE TABLE enrollment (
 	
 CREATE TABLE timeslots (
     section_id      INT         NOT NULL REFERENCES sections(section_id),
-    start_time      TIME        NOT NULL CHECK('08:30'::time <= start_time),
-    end_time        TIME        NOT NULL CHECK(end_time <= '22:00'::time AND start_time < end_time),
+    start_time      TIME        CHECK('08:30'::time <= start_time),
+    end_time        TIME        CHECK(end_time <= '22:00'::time AND start_time < end_time AND
+                                    ((start_time IS NOT NULL AND end_time IS NOT NULL) OR (start_time IS NULL AND end_time IS NULL))),
     -- encodes which days of the week a timeslot runs as bits: 1 Mon, 2 Tue, 4 Wed, 8 Thu, ...
     days_of_week    INT         NOT NULL CHECK(days_of_week BETWEEN 0 AND 127),
     start_date      DATE,
     end_date        DATE        CHECK(start_date <= end_date AND
-                                    ((start_date IS NOT NULL AND end_date IS NOT NULL) OR (start_date IS NULL AND end_date IS NULL)))
+                                    ((start_date IS NOT NULL AND end_date IS NOT NULL) OR (start_date IS NULL AND end_date IS NULL))),
+    CHECK(start_time IS NOT NULL OR start_date IS NOT NULL)
 );
 
 CREATE MATERIALIZED VIEW course_changes AS
