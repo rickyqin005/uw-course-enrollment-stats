@@ -17,6 +17,11 @@
   color: rgb(0, 0, 0);
 }
 
+.App-footer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
 h2 {
   margin-top: 2vmin;
   margin-bottom: 2vmin;
@@ -69,7 +74,7 @@ h2 {
   border-spacing: 0px;
   border-width: 0px;
   margin-top: 15px;
-  margin-bottom: 50px;
+  margin-bottom: 15px;
 }
 
 thead {
