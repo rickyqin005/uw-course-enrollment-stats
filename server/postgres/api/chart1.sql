@@ -3,13 +3,8 @@ SELECT
 	json_object_agg(day_of_week, COALESCE((
 		SELECT SUM(enroll_total)
 	    FROM sections
-		CROSS JOIN LATERAL(
-			SELECT enroll_total
-			FROM enrollment
-			WHERE enrollment.section_id = sections.section_id
-			ORDER BY check_time DESC
-			LIMIT 1
-		)
+		INNER JOIN enrollment
+		ON sections.section_id = enrollment.section_id AND enrollment.check_time = date_trunc('day', NOW())
 		INNER JOIN timeslots
 		ON timeslots.section_id = sections.section_id
 		WHERE

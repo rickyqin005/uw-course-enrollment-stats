@@ -51,7 +51,8 @@ async function refresh() {
                     .each((idx, element) => {
 
                         // skip cancelled sections
-                        if($(element).children(':last-child').text() == 'Cancelled Section') {
+                        const lastTxt = $(element).children(':last-child').text().trim();
+                        if(lastTxt == 'Cancelled Section' || lastTxt == 'Closed Section') {
                             while(timeslots.length > 0 && timeslots.at(-1)[0] == sections.at(-1)[0]) {
                                 timeslots.pop();
                             }
