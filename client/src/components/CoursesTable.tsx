@@ -45,7 +45,7 @@ const columns = [
     { textAlign: 'left', paddingLeft: '15px', paddingRight: '20px' }
 ];
 
-export default function CoursesTable() {
+export default function CoursesTable({ setChartSubjectSelected, setChartCodeSelected, enrollmentChartRef }) {
     const { data } = useAPI<Data[]>('/api/course_changes', {}, [],
     data => data.map((row, idx) => {
         return {
@@ -153,7 +153,12 @@ export default function CoursesTable() {
             {page.map((row, idx) => {
             prepareRow(row)
             return (
-                <tr {...row.getRowProps()}>
+                <tr {...row.getRowProps()}
+                    onClick={() => {
+                        setChartSubjectSelected(row.values.subject);
+                        setChartCodeSelected(row.values.code);
+                        enrollmentChartRef.current.scrollIntoView({ behavior: "smooth" });
+                    }}>
                 {row.cells.map((cell, idx) => {
                     return (
                     <td

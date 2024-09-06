@@ -2,11 +2,8 @@ import React from 'react';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import Switch from 'react-switch';
 import ChartOption from './ChartOption.tsx';
-import { CourseOptions } from './types.ts';
 import useAPI from '../hooks/useAPI.ts';
 const moment = require('moment');
-
-const consts = require('../consts.json');
 
 interface TimeFrame {
     name: string
@@ -17,11 +14,9 @@ interface TimeFrame {
 
 const sectionLineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'BlueViolet', 'Maroon', 'Olive', 'Magenta', 'Teal', 'MidnightBlue'];
 
-export default function EnrollmentChart({ courseOptions }: { courseOptions: CourseOptions }) {
-    const [chartSubjectSelected, setChartSubjectSelected] = React.useState<string>(consts.defaultSubjectSelected);
-    const [chartCodeSelected, setChartCodeSelected] = React.useState<string>(consts.defaultCodeSelected);
-    const [chartComponentSelected, setChartComponentSelected] = React.useState<string>(consts.defaultComponentSelected);
-    const [chartDisplayBySections, setChartDisplayBySections] = React.useState(false);
+export default function EnrollmentChart({ chartSubjectSelected, setChartSubjectSelected, chartCodeSelected, setChartCodeSelected,
+    chartComponentSelected, setChartComponentSelected, chartDisplayBySections, setChartDisplayBySections, courseOptions, enrollmentChartRef }) {
+    
 
     const { data, dataIsLoaded } = useAPI<TimeFrame[]>(
         chartDisplayBySections ? '/api/chart3' : '/api/chart2', {
@@ -64,7 +59,7 @@ export default function EnrollmentChart({ courseOptions }: { courseOptions: Cour
         if(!components.includes(chartComponentSelected)) setChartComponentSelected(components[0]);
     }, [componentOptions]);
 
-    return <div className="chart-region">
+    return <div className="chart-region" ref={enrollmentChartRef}>
         <h2>How does course enrollment change over time?</h2>
         <div className="chart-options">
             <ChartOption
