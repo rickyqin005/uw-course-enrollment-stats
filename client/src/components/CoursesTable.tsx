@@ -153,8 +153,7 @@ export default function CoursesTable() {
             {page.map((row, idx) => {
             prepareRow(row)
             return (
-                <tr {...row.getRowProps()}
-                style={{ backgroundColor: (idx%2 == 1 ? '#F8F8FF' : undefined) }}>
+                <tr {...row.getRowProps()}>
                 {row.cells.map((cell, idx) => {
                     return (
                     <td

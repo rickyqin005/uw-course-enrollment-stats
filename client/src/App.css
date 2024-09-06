@@ -77,8 +77,16 @@ h2 {
   margin-bottom: 15px;
 }
 
-thead {
+.courses-table tbody> tr:nth-child(even) {
+  background-color: #f8f8ff;
+}
+
+.courses-table tbody > tr:hover {
   background-color: #e6e6ff;
+}
+
+thead {
+  background-color: #d0d0ff;
 }
 
 td {
