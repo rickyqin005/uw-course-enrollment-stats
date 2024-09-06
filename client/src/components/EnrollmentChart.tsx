@@ -51,7 +51,18 @@ export default function EnrollmentChart({ courseOptions }: { courseOptions: Cour
     const componentOptions = React.useMemo(() =>
         (courseOptions.get(chartSubjectSelected)?.get(chartCodeSelected) ?? [])
             .map(component => { return { value: component, label: component }})
-    , [courseOptions, chartSubjectSelected, chartCodeSelected])
+    , [courseOptions, chartSubjectSelected, chartCodeSelected]);
+
+    // update course code selected if does not exist
+    React.useEffect(() => {
+        const map = courseOptions.get(chartSubjectSelected) ?? new Map<string, string[]>();
+        if(!map.get(chartCodeSelected)) setChartCodeSelected(map.entries().next().value[0]);
+    }, [codeOptions]);
+    // update component selected if does not exist
+    React.useEffect(() => {
+        const components = (courseOptions.get(chartSubjectSelected) ?? new Map<string, string[]>()).get(chartCodeSelected) ?? [];
+        if(!components.includes(chartComponentSelected)) setChartComponentSelected(components[0]);
+    }, [componentOptions]);
 
     return <div className="chart-region">
         <h2>How does course enrollment change over time?</h2>
@@ -61,11 +72,7 @@ export default function EnrollmentChart({ courseOptions }: { courseOptions: Cour
                 value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
                 options={subjectOptions}
                 isMultiSelect={false}
-                onChange={subject => {
-                    setChartSubjectSelected(subject.value);
-                    const map = courseOptions.get(subject.value) ?? new Map();
-                    if(!map.get(chartCodeSelected)) setChartCodeSelected(map.entries().next().value[0]);
-                }}/>
+                onChange={subject => setChartSubjectSelected(subject.value)}/>
             <ChartOption
                 name="Code:"
                 value={{ value: chartCodeSelected, label: chartCodeSelected }}
