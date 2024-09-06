@@ -20,7 +20,6 @@ export default function App() {
 				<h1>UW Course Enrollment Stats</h1>
 				<FrequencyChart courseOptions={data} components={components} />
 				<EnrollmentChart courseOptions={data} />
-				<EnrollmentChart2 courseOptions={data} />
 				<CoursesTable />
 			</div>
 			<div className="App-footer">
