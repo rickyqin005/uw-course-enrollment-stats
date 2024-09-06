@@ -29,25 +29,33 @@ export default function EnrollmentChart({ courseOptions }: { courseOptions: Cour
         return data;
     }, [chartSubjectSelected, chartCodeSelected]);
 
+    const subjectOptions = React.useMemo(() =>
+        Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})
+    , [courseOptions]);
+    const codeOptions = React.useMemo(() =>
+        Array.from((courseOptions.get(chartSubjectSelected) ?? new Map()).keys())
+            .map(course => { return { value: course, label: course }})
+    , [courseOptions, chartSubjectSelected]);
+
     return <div className="chart-region">
         <h2>How does course enrollment change over time?</h2>
         <div className="chart-options">
-        <ChartOption
-            name="Subject:"
-            value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
-            options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
-            isMultiSelect={false}
-            onChange={subject => {
-                setChartSubjectSelected(subject.value);
-                setChartCodeSelected((courseOptions.get(subject.value) ?? new Map()).entries().next().value[0]);
-            }}/>
-        <ChartOption
-            name="Code:"
-            value={{ value: chartCodeSelected, label: chartCodeSelected }}
-            options={Array.from((courseOptions.get(chartSubjectSelected) ?? new Map()).keys())
-                .map(course => { return { value: course, label: course }})}
-            isMultiSelect={false}
-            onChange={code => setChartCodeSelected(code.value)}/>
+            <ChartOption
+                name="Subject:"
+                value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
+                options={subjectOptions}
+                isMultiSelect={false}
+                onChange={subject => {
+                    setChartSubjectSelected(subject.value);
+                    const map = courseOptions.get(subject.value) ?? new Map();
+                    if(!map.get(chartCodeSelected)) setChartCodeSelected(map.entries().next().value[0]);
+                }}/>
+            <ChartOption
+                name="Code:"
+                value={{ value: chartCodeSelected, label: chartCodeSelected }}
+                options={codeOptions}
+                isMultiSelect={false}
+                onChange={code => setChartCodeSelected(code.value)}/>
         </div>
         <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
             {!dataIsLoaded ? <div className="chart-loading">Loading...</div> : ''}

@@ -5,10 +5,10 @@ import { CourseOptions, ValueAndLabel } from "./types.ts";
 import useAPI from "../hooks/useAPI.ts";
 const moment = require('moment');
 
-const staticData = require('../consts.json');
-let currWeek = moment(staticData.firstWeek);
+const { firstWeek, lastWeek } = require('../consts.json');
+let currWeek = moment(firstWeek);
 const weeksList: ValueAndLabel<string>[] = [];
-while(currWeek.isSameOrBefore(moment(staticData.lastWeek))) {
+while(currWeek.isSameOrBefore(moment(lastWeek))) {
     weeksList.push({
         value: currWeek.toISOString(),
         label: currWeek.format('MMM D')
@@ -36,6 +36,13 @@ export default function FrequencyChart({ courseOptions, components }: { courseOp
         week: chartWeekSelected.value
     }, [], data => data,
     [chartSubjectsSelected, chartComponentsSelected, chartWeekSelected]);
+
+    const subjectOptions = React.useMemo(() =>
+        Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})
+    , [courseOptions]);
+    const componentOptions = React.useMemo(() =>
+        components.map(component => { return { value: component, label: component }})
+    , [components]);
     
     return <div className="chart-region">
         <h2>When do people usually have classes?</h2>
@@ -43,13 +50,13 @@ export default function FrequencyChart({ courseOptions, components }: { courseOp
         <ChartOption
             name="Subject:"
             value={undefined}
-            options={Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})}
+            options={subjectOptions}
             isMultiSelect={true}
             onChange={subjects => setChartSubjectsSelected(subjects.map(subject => subject.value))}/>
         <ChartOption
             name="Component:"
             value={undefined}
-            options={components.map(component => { return { value: component, label: component }})}
+            options={componentOptions}
             isMultiSelect={true}
             onChange={components => setChartComponentsSelected(components.map(component => component.value))}/>
         <ChartOption
