@@ -17,31 +17,31 @@ type Data = {
 
 const headersConst = [
     { Header: 'Rank', accessor: 'rank',
-        style: { rowSpan: 2, textAlign: 'left', paddingLeft: '2vw', paddingRight: '3vw', paddingBottom: '0.8vw' } },
+        style: { rowSpan: 2, textAlign: 'left', paddingLeft: '2vw', paddingRight: '3vw', paddingBottom: '8px' } },
     { Header: 'Course', accessor: 'subject',
-        style: { rowSpan: 2, textAlign: 'left', paddingRight: '1vw', paddingBottom: '0.8vw' } },
+        style: { rowSpan: 2, textAlign: 'left', paddingRight: '1vw', paddingBottom: '8px' } },
     { Header: ' ', accessor: 'code',
         style: { rowSpan: 2 } },
     { Header: 'Title', accessor: 'title',
-        style: { rowSpan: 2, textAlign: 'left', paddingRight: '2vw', paddingBottom: '0.8vw' } },
+        style: { rowSpan: 2, textAlign: 'left', paddingRight: '2vw', paddingBottom: '8px' } },
     { Header: 'Enrollment', accessor: 'curr_enroll_total',
-        style: { rowSpan: 2, textAlign: 'right', paddingRight: '2vw', paddingBottom: '0.8vw' } },
+        style: { rowSpan: 2, textAlign: 'right', paddingRight: '2vw', paddingBottom: '8px' } },
     { Header: 'Change',
         columns: [
             { Header: 'Day', accessor: 'day_change.label',
-                style: { paddingLeft: '1.5vw', paddingRight: '1.5vw', paddingBottom: '0.8vw' },
+                style: { paddingLeft: '1.5vw', paddingRight: '1.5vw', paddingBottom: '8px' },
                 sortType: (r1, r2) => r1.original.day_change.value - r2.original.day_change.value
             },
             { Header: 'Week', accessor: 'week_change.label',
-                style: { paddingLeft: '1.5vw', paddingRight: '1.5vw', paddingBottom: '0.8vw' },
+                style: { paddingLeft: '1.5vw', paddingRight: '1.5vw', paddingBottom: '8px' },
                 sortType: (r1, r2) => r1.original.week_change.value - r2.original.week_change.value
             },
             { Header: 'Month', accessor: 'month_change.label',
-                style: { paddingLeft: '1.5vw', paddingRight: '2vw', paddingBottom: '0.8vw' },
+                style: { paddingLeft: '1.5vw', paddingRight: '2vw', paddingBottom: '8px' },
                 sortType: (r1, r2) => r1.original.month_change.value - r2.original.month_change.value
             }
         ],
-        style: { columnSpan: 3, textAlign: 'center', paddingTop: '0.8vw' }
+        style: { columnSpan: 3, textAlign: 'center', paddingTop: '8px' }
     },
 ];
 const columns = [
@@ -86,11 +86,11 @@ export default function CoursesTable({ enrollmentChartState }: { enrollmentChart
         setPageSize,
         state: { pageIndex, pageSize },
     } = useTable({ columns: headers, data,
-            initialState: { pageSize: 10 }
+            initialState: { pageSize: 20 }
         }, useSortBy, usePagination);
     
     return (<>
-        <h2>Which courses are taken the most?</h2>
+        <h2>Which courses are the most popular?</h2>
         <div className="pagination">
             <div>
                 <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
