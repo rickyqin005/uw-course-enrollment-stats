@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
-import { ValueAndLabel } from './types';
+import { EnrollmentChartState, ValueAndLabel } from './types';
 import useAPI from '../hooks/useAPI.ts';
+import updateOptionsSelected from './updateOptionsSelected.ts';
 
 type Data = {
     rank: number,
@@ -23,13 +24,13 @@ const headersConst = [
     { Header: 'Change',
         columns: [
             { Header: 'Day', accessor: 'day_change.label', style: { paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px' },
-                sortType: (r1, r2, id, desc) => r1.original.day_change.value - r2.original.day_change.value
+                sortType: (r1, r2) => r1.original.day_change.value - r2.original.day_change.value
             },
             { Header: 'Week', accessor: 'week_change.label', style: { paddingLeft: '15px', paddingRight: '15px', paddingBottom: '8px' },
-                sortType: (r1, r2, id, desc) => r1.original.week_change.value - r2.original.week_change.value
+                sortType: (r1, r2) => r1.original.week_change.value - r2.original.week_change.value
             },
             { Header: 'Month', accessor: 'month_change.label', style: { paddingLeft: '15px', paddingRight: '20px', paddingBottom: '8px' },
-                sortType: (r1, r2, id, desc) => r1.original.month_change.value - r2.original.month_change.value
+                sortType: (r1, r2) => r1.original.month_change.value - r2.original.month_change.value
             }
         ],
         style: { columnSpan: 3, textAlign: 'center', paddingTop: '8px' }
@@ -45,7 +46,8 @@ const columns = [
     { textAlign: 'left', paddingLeft: '15px', paddingRight: '20px' }
 ];
 
-export default function CoursesTable({ setChartSubjectSelected, setChartCodeSelected, enrollmentChartRef }) {
+export default function CoursesTable({ enrollmentChartState }: { enrollmentChartState: EnrollmentChartState }) {
+
     const { data } = useAPI<Data[]>('/api/course_changes', {}, [],
     data => data.map((row, idx) => {
         return {
@@ -155,9 +157,8 @@ export default function CoursesTable({ setChartSubjectSelected, setChartCodeSele
             return (
                 <tr {...row.getRowProps()}
                     onClick={() => {
-                        setChartSubjectSelected(row.values.subject);
-                        setChartCodeSelected(row.values.code);
-                        enrollmentChartRef.current.scrollIntoView({ behavior: "smooth" });
+                        updateOptionsSelected({ subject: row.values.subject, code: row.values.code }, enrollmentChartState);
+                        enrollmentChartState.chartRef.current.scrollIntoView({ behavior: "smooth" });
                     }}>
                 {row.cells.map((cell, idx) => {
                     return (

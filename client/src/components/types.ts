@@ -11,3 +11,16 @@ export type CourseOptionsRaw = {
 		}[]
 	}[]
 };
+
+export type EnrollmentChartState = {
+    chartSubjectSelected: string,
+    setChartSubjectSelected: React.Dispatch<React.SetStateAction<string>>,
+    chartCodeSelected: string,
+    setChartCodeSelected: React.Dispatch<React.SetStateAction<string>>,
+    chartComponentSelected: string,
+    setChartComponentSelected: React.Dispatch<React.SetStateAction<string>>,
+	chartDisplayBySections: boolean,
+	setChartDisplayBySections: React.Dispatch<React.SetStateAction<boolean>>,
+    courseOptions: CourseOptions,
+	chartRef: React.MutableRefObject<null>
+};

@@ -3,6 +3,8 @@ import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line
 import Switch from 'react-switch';
 import ChartOption from './ChartOption.tsx';
 import useAPI from '../hooks/useAPI.ts';
+import { EnrollmentChartState } from './types.ts';
+import updateOptionsSelected from './updateOptionsSelected.ts';
 const moment = require('moment');
 
 interface TimeFrame {
@@ -14,80 +16,68 @@ interface TimeFrame {
 
 const sectionLineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'BlueViolet', 'Maroon', 'Olive', 'Magenta', 'Teal', 'MidnightBlue'];
 
-export default function EnrollmentChart({ chartSubjectSelected, setChartSubjectSelected, chartCodeSelected, setChartCodeSelected,
-    chartComponentSelected, setChartComponentSelected, chartDisplayBySections, setChartDisplayBySections, courseOptions, enrollmentChartRef }) {
-    
+export default function EnrollmentChart({ state }: { state: EnrollmentChartState }) {
 
     const { data, dataIsLoaded } = useAPI<TimeFrame[]>(
-        chartDisplayBySections ? '/api/chart3' : '/api/chart2', {
-            subject: chartSubjectSelected,
-            code: chartCodeSelected,
-            component: (chartDisplayBySections ? chartComponentSelected : undefined)
+        state.chartDisplayBySections ? '/api/chart3' : '/api/chart2', {
+            subject: state.chartSubjectSelected,
+            code: state.chartCodeSelected,
+            component: (state.chartDisplayBySections ? state.chartComponentSelected : undefined)
         },
         [], data => {
             if(data.length > 0) {
+                const endOfMonth = moment().endOf('month').startOf('day');
+                const lastDay = moment.min(endOfMonth, moment("2024-12-03T04:00:00.000Z"));
                 let currDay = moment(data[data.length-1].name).add(1, 'days');
-                const lastDay = moment("2024-09-30T04:00:00.000Z");
                 while(currDay.isSameOrBefore(lastDay)) {
                     data.push({ name: currDay.toISOString() });
                     currDay.add(1, 'days');
                 }
             }
             return data;
-        }, [chartDisplayBySections, chartSubjectSelected, chartCodeSelected, chartComponentSelected]);
+        }, [state.chartDisplayBySections, state.chartSubjectSelected, state.chartCodeSelected, state.chartComponentSelected]);
 
     const subjectOptions = React.useMemo(() =>
-        Array.from(courseOptions.keys()).map(subject => { return { value: subject, label: subject }})
-    , [courseOptions]);
+        Array.from(state.courseOptions.keys()).map(subject => { return { value: subject, label: subject }})
+    , [state.courseOptions]);
     const codeOptions = React.useMemo(() =>
-        Array.from((courseOptions.get(chartSubjectSelected) ?? new Map()).keys())
+        Array.from((state.courseOptions.get(state.chartSubjectSelected) ?? new Map()).keys())
             .map(course => { return { value: course, label: course }})
-    , [courseOptions, chartSubjectSelected]);
+    , [state.courseOptions, state.chartSubjectSelected]);
     const componentOptions = React.useMemo(() =>
-        (courseOptions.get(chartSubjectSelected)?.get(chartCodeSelected) ?? [])
+        (state.courseOptions.get(state.chartSubjectSelected)?.get(state.chartCodeSelected) ?? [])
             .map(component => { return { value: component, label: component }})
-    , [courseOptions, chartSubjectSelected, chartCodeSelected]);
+    , [state.courseOptions, state.chartSubjectSelected, state.chartCodeSelected]);
 
-    // update course code selected if does not exist
-    React.useEffect(() => {
-        const map = courseOptions.get(chartSubjectSelected) ?? new Map<string, string[]>();
-        if(!map.get(chartCodeSelected)) setChartCodeSelected(map.entries().next().value[0]);
-    }, [codeOptions]);
-    // update component selected if does not exist
-    React.useEffect(() => {
-        const components = (courseOptions.get(chartSubjectSelected) ?? new Map<string, string[]>()).get(chartCodeSelected) ?? [];
-        if(!components.includes(chartComponentSelected)) setChartComponentSelected(components[0]);
-    }, [componentOptions]);
-
-    return <div className="chart-region" ref={enrollmentChartRef}>
+    return <div className="chart-region" ref={state.chartRef}>
         <h2>How does course enrollment change over time?</h2>
         <div className="chart-options">
             <ChartOption
                 name="Subject:"
-                value={{ value: chartSubjectSelected, label: chartSubjectSelected }}
+                value={{ value: state.chartSubjectSelected, label: state.chartSubjectSelected }}
                 options={subjectOptions}
                 isMultiSelect={false}
-                onChange={subject => setChartSubjectSelected(subject.value)}/>
+                onChange={subject => updateOptionsSelected({ subject: subject.value }, state)}/>
             <ChartOption
                 name="Code:"
-                value={{ value: chartCodeSelected, label: chartCodeSelected }}
+                value={{ value: state.chartCodeSelected, label: state.chartCodeSelected }}
                 options={codeOptions}
                 isMultiSelect={false}
-                onChange={code => setChartCodeSelected(code.value)}/>
-            {!chartDisplayBySections ? '' :
+                onChange={code => updateOptionsSelected({ code: code.value }, state)}/>
+            {!state.chartDisplayBySections ? '' :
             <ChartOption
                 name="Component:"
-                value={{ value: chartComponentSelected, label: chartComponentSelected }}
+                value={{ value: state.chartComponentSelected, label: state.chartComponentSelected }}
                 options={componentOptions}
                 isMultiSelect={false}
-                onChange={component => setChartComponentSelected(component.value)}/>}
+                onChange={component => updateOptionsSelected({ component: component.value }, state)}/>}
             <div style={{marginLeft: '50px', display: 'flex', alignItems: 'center'}}>
                 <span style={{paddingRight: '10px'}}>Display by sections?</span>
-                <Switch onChange={checked => setChartDisplayBySections(checked)} checked={chartDisplayBySections}/>
+                <Switch onChange={checked => state.setChartDisplayBySections(checked)} checked={state.chartDisplayBySections}/>
             </div>
         </div>
-        {!chartDisplayBySections ?
-        <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
+        {!state.chartDisplayBySections ?
+        <div className="chart-container" style={{ width: 'max(min(70vw, 1200px), 700px)' }}>
             {!dataIsLoaded ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={data}
@@ -105,7 +95,7 @@ export default function EnrollmentChart({ chartSubjectSelected, setChartSubjectS
                         labelFormatter={val => toDateString(val)} />
                     <Legend />
                     <Line type="monotone"
-                        name={`${chartSubjectSelected} ${chartCodeSelected}`}
+                        name={`${state.chartSubjectSelected} ${state.chartCodeSelected}`}
                         dataKey="enrollment"
                         stroke="Black"
                         strokeWidth={2}/>

@@ -3,7 +3,7 @@ import "./App.css";
 import FrequencyChart from "./components/FrequencyChart.tsx";
 import CoursesTable from "./components/CoursesTable.tsx";
 import EnrollmentChart from "./components/EnrollmentChart.tsx";
-import { CourseOptions, CourseOptionsRaw } from "./components/types.ts";
+import { CourseOptions, CourseOptionsRaw, EnrollmentChartState } from "./components/types.ts";
 import useAPI from "./hooks/useAPI.ts";
 
 const consts = require('./consts.json');
@@ -19,26 +19,22 @@ export default function App() {
 	const { data } = useAPI<CourseOptions>
 		('/api/info', {}, parseCourseOptions(consts.defaultCourseOptions), parseCourseOptions, []);
 
+	const enrollmentChartState: EnrollmentChartState = {
+		chartSubjectSelected, setChartSubjectSelected,
+		chartCodeSelected, setChartCodeSelected,
+		chartComponentSelected, setChartComponentSelected,
+		chartDisplayBySections, setChartDisplayBySections,
+		courseOptions: data,
+		chartRef: enrollmentChartRef
+	};
+
 	return (
 		<div className="App">
 			<div className="App-body">
 				<h1>UW Course Enrollment Stats</h1>
 				<FrequencyChart courseOptions={data} components={components} />
-				<EnrollmentChart
-					chartSubjectSelected={chartSubjectSelected}
-					setChartSubjectSelected={setChartSubjectSelected}
-					chartCodeSelected={chartCodeSelected}
-					setChartCodeSelected={setChartCodeSelected}
-					chartComponentSelected={chartComponentSelected}
-					setChartComponentSelected={setChartComponentSelected}
-					chartDisplayBySections={chartDisplayBySections}
-					setChartDisplayBySections={setChartDisplayBySections}
-					courseOptions={data}
-					enrollmentChartRef={enrollmentChartRef} />
-				<CoursesTable
-					setChartSubjectSelected={setChartSubjectSelected}
-					setChartCodeSelected={setChartCodeSelected}
-					enrollmentChartRef={enrollmentChartRef} />
+				<EnrollmentChart state={enrollmentChartState} />
+				<CoursesTable enrollmentChartState={enrollmentChartState} />
 			</div>
 			<div className="App-footer">
 				Made by Ricky Qin, check out my other projects <a href="https://github.com/rickyqin005">here</a>!
