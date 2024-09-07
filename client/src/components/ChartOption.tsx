@@ -8,12 +8,12 @@ export default function ChartOption({ name, value, options, isMultiSelect, onCha
     return <div className="option-container">
         <div className="option-name">{name}</div>
         <Select
-        value={value}
-        isMulti={isMultiSelect}
-        options={options}
-        className="basic-multi-select"
-        classNamePrefix="select"
-        onChange={onChange}
-        />
+            value={value}
+            isMulti={isMultiSelect}
+            options={options}
+            className="basic-multi-select"
+            classNamePrefix="select"
+            onChange={onChange}
+            />
     </div>
 }

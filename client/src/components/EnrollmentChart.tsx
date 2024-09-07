@@ -20,7 +20,8 @@ type Data = {
     series: (CourseSeries | SectionSeries)[] | undefined
 }[];
 
-const sectionLineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'BlueViolet', 'Maroon', 'Olive', 'Magenta', 'Teal', 'MidnightBlue'];
+const sectionLineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'Purple', 'Maroon', 'DeepSkyBlue', 'Magenta',
+    'Teal', 'MidnightBlue', 'DarkOliveGreen', 'SaddleBrown', 'DarkGoldenRod', 'Plum', 'Salmon'];
 
 export default function EnrollmentChart({ state }: { state: EnrollmentChartState }) {
 
@@ -99,9 +100,10 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                 options={componentOptions}
                 isMultiSelect={false}
                 onChange={component => updateOptionsSelected({ component: component.value }, state)}/>}
-            <div style={{marginLeft: '50px', display: 'flex', alignItems: 'center'}}>
-                <span style={{paddingRight: '10px'}}>Display by sections?</span>
-                <Switch onChange={checked => state.setChartDisplayBySections(checked)} checked={state.chartDisplayBySections}/>
+            <div style={{display: 'flex', alignItems: 'center'}}>
+                <span style={{paddingRight: '1vw'}}>Show sections:</span>
+                <Switch checked={state.chartDisplayBySections}
+                    onChange={checked => state.setChartDisplayBySections(checked)} />
             </div>
         </div>
         {!state.chartDisplayBySections ?
