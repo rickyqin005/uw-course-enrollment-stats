@@ -76,11 +76,7 @@ app.get('/api/check', (req, res) => {
             code: staticData.defaultCodeSelected,
             component: staticData.defaultComponentSelected
         },
-        toSQLParams: params => params,
-        callback: rows => rows.map(row => { return {
-            name: row.name,
-            ...Object.assign({}, ...row.series.map(o => {const newO = {}; newO[o.component] = o.enroll_total; return newO;}))
-        }})
+        toSQLParams: params => params
     }
 ].forEach(route => {
     app.get(route.path, async (req, res) => {

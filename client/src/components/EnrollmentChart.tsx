@@ -7,33 +7,61 @@ import { EnrollmentChartState } from './types.ts';
 import updateOptionsSelected from './updateOptionsSelected.ts';
 const moment = require('moment');
 
-interface TimeFrame {
-    name: string
-    // series1 name: series1 value
-    // series2 name: series2 value
-    // ...
+type CourseSeries = {
+    enrollment: number
 };
+type SectionSeries = {
+    component: string,
+    enroll_total: number,
+    enroll_cap: number
+};
+type Data = {
+    name: string,
+    series: (CourseSeries | SectionSeries)[] | undefined
+}[];
 
 const sectionLineColors = ['Red', 'Blue', 'Green', 'DarkOrange', 'BlueViolet', 'Maroon', 'Olive', 'Magenta', 'Teal', 'MidnightBlue'];
 
 export default function EnrollmentChart({ state }: { state: EnrollmentChartState }) {
 
-    const { data, dataIsLoaded } = useAPI<TimeFrame[]>(
+    const { data, dataIsLoaded } = useAPI<Data>(
         state.chartDisplayBySections ? '/api/chart3' : '/api/chart2', {
             subject: state.chartSubjectSelected,
             code: state.chartCodeSelected,
             component: (state.chartDisplayBySections ? state.chartComponentSelected : undefined)
         },
-        [], data => {
+        [], (data: Data) => {
+            // length timeseries to end of current month
             if(data.length > 0) {
                 const endOfMonth = moment().endOf('month').startOf('day');
                 const lastDay = moment.min(endOfMonth, moment("2024-12-03T04:00:00.000Z"));
                 let currDay = moment(data[data.length-1].name).add(1, 'days');
                 while(currDay.isSameOrBefore(lastDay)) {
-                    data.push({ name: currDay.toISOString() });
+                    data.push({ name: currDay.toISOString(), series: []});
                     currDay.add(1, 'days');
                 }
             }
+
+            // process series
+            data = data.map(timeFrame => { return {
+                name: timeFrame.name,
+                ...Object.assign({}, ...(timeFrame.series?.map(o => {
+                    const newO = {};
+                    if(state.chartDisplayBySections) {
+                        const section = o as SectionSeries;
+                        newO[section.component] = {
+                            value: section.enroll_total/section.enroll_cap,
+                            enroll_total: section.enroll_total,
+                            enroll_cap: section.enroll_cap
+                        };
+                    } else {
+                        const course = o as CourseSeries;
+                        newO['enrollment'] = course.enrollment;
+                    }
+                    return newO;
+                }) ?? []))
+            }});
+            console.log(data);
             return data;
         }, [state.chartDisplayBySections, state.chartSubjectSelected, state.chartCodeSelected, state.chartComponentSelected]);
 
@@ -116,14 +144,16 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         domain={([dataMin, dataMax]) => [Math.floor(dataMin*10)/10, Math.ceil(dataMax*10)/10]}
                         allowDecimals={true}
                         tickFormatter={val => toPercentString(val)} />
-                    <Tooltip 
-                        formatter={val => toPercentString(val)}
+                    <Tooltip
+                        contentStyle={{textAlign: 'left'}}
+                        formatter={(val, name, item) =>
+                            `${item.payload[name].enroll_total}/${item.payload[name].enroll_cap} (${toPercentString(val)})`}
                         labelFormatter={val => toDateString(val)}
                         itemSorter={item => (item.value as number) * -1}/>
                     <Legend />
                     {data.length > 0 ? 
-                        Object.keys(data[0]).slice(1).map((series, idx) =>
-                            <Line type="monotone" name={series} dataKey={series}
+                        Object.keys(data[0]).filter(key => key != 'name').map((series, idx) =>
+                            <Line type="monotone" name={series} dataKey={`${series}.value`}
                                 stroke={idx < sectionLineColors.length ? sectionLineColors[idx] :
                                     `#${Math.floor(Math.random()*256*256*256).toString(16).padStart(6,'0')}`}
                                 strokeWidth={2} />

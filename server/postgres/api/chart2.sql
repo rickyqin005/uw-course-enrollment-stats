@@ -1,5 +1,5 @@
-SELECT check_time as name,
-    MAX(course_enroll_total) AS enrollment
+SELECT check_time AS name,
+    ARRAY[json_object('enrollment': MAX(course_enroll_total))] AS series
 FROM (
     SELECT check_time,
         SUM(enroll_total)::integer AS course_enroll_total

@@ -1,5 +1,5 @@
-SELECT check_time as name,
-	json_agg(json_object('component': component, 'enroll_total': enroll_total::real/enroll_cap)) AS series
+SELECT check_time AS name,
+	json_agg(json_object('component': component, 'enroll_total': enroll_total, 'enroll_cap': enroll_cap)) AS series
 FROM(
 	SELECT * FROM enrollment
 	INNER JOIN sections
