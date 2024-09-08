@@ -45,5 +45,27 @@
         "STU",
         "WRK",
         "WSP"
+    ],
+    "importantDates": [
+        {
+            "date": "2024-09-04",
+            "label": "Classes Begin"
+        },
+        {
+            "date": "2024-09-11",
+            "label": "Reserves removed"
+        },
+        {
+            "date": "2024-09-17",
+            "label": "Last day to add a class"
+        },
+        {
+            "date": "2024-09-25",
+            "label": "Drop with WD begins"
+        },
+        {
+            "date": "2024-11-20",
+            "label": "Drop with WF begins"
+        }
     ]
 }

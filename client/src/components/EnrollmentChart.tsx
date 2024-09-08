@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Line, ReferenceLine } from 'recharts';
 import Switch from 'react-switch';
 import ChartOption from './ChartOption.tsx';
 import useAPI from '../hooks/useAPI.ts';
@@ -8,6 +8,11 @@ import updateOptionsSelected from './updateOptionsSelected.ts';
 const moment = require('moment');
 
 const consts = require('../consts.json');
+
+const importantDates = consts.importantDates.map(date => ({
+    date: moment.utc(date.date).toISOString(),
+    label: date.label
+}));
 
 type CourseSeries = {
     enrollment: number
@@ -34,7 +39,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
             component: (state.chartDisplayBySections ? state.chartComponentSelected : undefined)
         },
         [], (data: Data) => {
-            // length timeseries to end of current month
+            // lengthen timeseries to end of current month
             if(data.length > 0) {
                 const endOfMonth = moment().endOf('month').startOf('day');
                 const lastDay = moment.min(endOfMonth, moment(consts.lastDayOfClass));
@@ -121,10 +126,16 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         domain={['auto', 'auto']}
                         allowDecimals={false}
                         tickFormatter={val => val.toLocaleString()} />
-                    <Tooltip 
+                    <Tooltip
                         formatter={val => val.toLocaleString()}
-                        labelFormatter={val => toDateString(val)} />
+                        labelFormatter={val => {
+                            const dateEvent = importantDates.find(date => date.date == val)?.label;
+                            return `${toDateString(val)}${dateEvent ? ` (${dateEvent})` : ''}`;
+                        }} />
                     <Legend />
+                    {importantDates.map(date =>
+                        <ReferenceLine x={moment.utc(date.date).toISOString()} strokeWidth={2} />
+                    )}
                     <Line type="monotone"
                         name={`${state.chartSubjectSelected} ${state.chartCodeSelected}`}
                         dataKey="enrollment"
@@ -153,9 +164,15 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         contentStyle={{textAlign: 'left'}}
                         formatter={(val, name, item) =>
                             `${item.payload[name].enroll_total}/${item.payload[name].enroll_cap} (${toPercentString(val)})`}
-                        labelFormatter={val => toDateString(val)}
+                        labelFormatter={val => {
+                            const dateEvent = importantDates.find(date => date.date == val)?.label;
+                            return `${toDateString(val)}${dateEvent ? ` (${dateEvent})` : ''}`;
+                        }}
                         itemSorter={item => (item.value as number) * -1}/>
                     <Legend />
+                    {importantDates.map(date =>
+                        <ReferenceLine x={moment.utc(date.date).toISOString()} strokeWidth={2} />
+                    )}
                     {data.length > 0 ? 
                         Object.keys(data[0]).filter(key => key != 'name').map((series, idx) =>
                             <Line type="monotone" name={series} dataKey={`${series}.value`}
