@@ -39,20 +39,10 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
             component: (state.chartDisplayBySections ? state.chartComponentSelected : undefined)
         },
         [], (data: Data) => {
-            // lengthen timeseries to end of current month
-            if(data.length > 0) {
-                const endOfMonth = moment().endOf('month').startOf('day');
-                const lastDay = moment.min(endOfMonth, moment(consts.lastDayOfClass));
-                let currDay = moment(data[data.length-1].name).add(1, 'days');
-                while(currDay.isSameOrBefore(lastDay)) {
-                    data.push({ name: currDay.toISOString(), series: []});
-                    currDay.add(1, 'days');
-                }
-            }
 
             // process series
             data = data.map(timeFrame => { return {
-                name: timeFrame.name,
+                name: moment.utc(timeFrame.name).startOf('day').toISOString(),
                 ...Object.assign({}, ...(timeFrame.series?.map(o => {
                     const newO = {};
                     if(state.chartDisplayBySections) {
@@ -69,6 +59,18 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                     return newO;
                 }) ?? []))
             }});
+
+            // lengthen timeseries to end of current month
+            if(data.length > 0) {
+                const endOfMonth = moment.utc().endOf('month').startOf('day');
+                const lastDay = moment.min(endOfMonth, moment.utc(consts.lastDayOfClass));
+                let currDay = moment.utc(data.at(-1).name).add(1, 'days');
+
+                while(currDay.isSameOrBefore(lastDay)) {
+                    data.push({ name: currDay.toISOString(), series: undefined });
+                    currDay.add(1, 'days');
+                }
+            }
             return data;
         }, [state.chartDisplayBySections, state.chartSubjectSelected, state.chartCodeSelected, state.chartComponentSelected]);
 
@@ -134,7 +136,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         }} />
                     <Legend />
                     {importantDates.map(date =>
-                        <ReferenceLine x={moment.utc(date.date).toISOString()} strokeWidth={2} />
+                        <ReferenceLine x={date.date} strokeWidth={2} />
                     )}
                     <Line type="monotone"
                         name={`${state.chartSubjectSelected} ${state.chartCodeSelected}`}
@@ -156,7 +158,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         tickFormatter={val => toDateString(val)}/>
                     <YAxis type='number' label={{ value: "% of Capacity", angle: -90, position: "left" }}
                         domain={([dataMin, dataMax]) =>
-                            [Math.floor(dataMin*20)/20, Math.min(Math.ceil(dataMax*20)/20, Math.ceil(dataMax*100)/100)]}
+                            [Math.floor(dataMin*20)/20, Math.min(Math.ceil(dataMax*20)/20, Math.max(Math.ceil(dataMax*100)/100, 1))]}
                         minTickGap={0.05}
                         allowDecimals={true}
                         tickFormatter={val => toPercentString(val)} />
@@ -171,7 +173,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                         itemSorter={item => (item.value as number) * -1}/>
                     <Legend />
                     {importantDates.map(date =>
-                        <ReferenceLine x={moment.utc(date.date).toISOString()} strokeWidth={2} />
+                        <ReferenceLine x={date.date} strokeWidth={2} />
                     )}
                     {data.length > 0 ? 
                         Object.keys(data[0]).filter(key => key != 'name').map((series, idx) =>
@@ -187,7 +189,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
 }
 
 function toDateString(val): string {
-    return moment(val).subtract(moment().utcOffset(), 'minutes').format('MMM D');
+    return moment.utc(val).format('MMM D');
 }
 
 function toPercentString(val): string {

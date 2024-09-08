@@ -6,7 +6,6 @@ export default function useAPI<T>(path: string, queryParams, initialValue: T, ca
     useEffect(() => {
         setDataIsLoaded(false);
         const fullURL = `${process.env.REACT_APP_SERVER_URL}${path}?params=${JSON.stringify(queryParams)}`;
-        console.log(`fetching ${fullURL}`);
         fetch(fullURL, {
             method: "GET",
             mode: 'cors',

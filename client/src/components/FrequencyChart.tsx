@@ -6,11 +6,11 @@ import useAPI from "../hooks/useAPI.ts";
 const moment = require('moment');
 
 const { firstWeek, lastWeek } = require('../consts.json');
-let currWeek = moment(firstWeek);
+let currWeek = moment.utc(firstWeek);
 const weeksList: ValueAndLabel<string>[] = [];
 let defaultWeekSelectedIndex = 0;
-while(currWeek.isSameOrBefore(moment(lastWeek))) {
-    if(currWeek <= moment()) defaultWeekSelectedIndex = weeksList.length;
+while(currWeek.isSameOrBefore(moment.utc(lastWeek))) {
+    if(currWeek <= moment.utc()) defaultWeekSelectedIndex = weeksList.length;
     weeksList.push({
         value: currWeek.toISOString(),
         label: currWeek.format('MMM D')
