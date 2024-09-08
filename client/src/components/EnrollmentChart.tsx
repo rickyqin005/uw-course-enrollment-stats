@@ -7,6 +7,8 @@ import { EnrollmentChartState } from './types.ts';
 import updateOptionsSelected from './updateOptionsSelected.ts';
 const moment = require('moment');
 
+const consts = require('../consts.json');
+
 type CourseSeries = {
     enrollment: number
 };
@@ -35,7 +37,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
             // length timeseries to end of current month
             if(data.length > 0) {
                 const endOfMonth = moment().endOf('month').startOf('day');
-                const lastDay = moment.min(endOfMonth, moment("2024-12-03T04:00:00.000Z"));
+                const lastDay = moment.min(endOfMonth, moment(consts.lastDayOfClass));
                 let currDay = moment(data[data.length-1].name).add(1, 'days');
                 while(currDay.isSameOrBefore(lastDay)) {
                     data.push({ name: currDay.toISOString(), series: []});
@@ -62,7 +64,6 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                     return newO;
                 }) ?? []))
             }});
-            console.log(data);
             return data;
         }, [state.chartDisplayBySections, state.chartSubjectSelected, state.chartCodeSelected, state.chartComponentSelected]);
 
@@ -133,7 +134,7 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
             </ResponsiveContainer>
         </div>
         :
-        <div className="chart-container" style={{ width: 'max(min(75vw, 1300px), 700px)' }}>
+        <div className="chart-container" style={{ width: 'max(min(70vw, 1200px), 700px)' }}>
             {!dataIsLoaded ? <div className="chart-loading">Loading...</div> : ''}
             <ResponsiveContainer aspect={2}>
                 <LineChart data={data}
@@ -143,7 +144,9 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                     <XAxis type='category' dataKey="name"
                         tickFormatter={val => toDateString(val)}/>
                     <YAxis type='number' label={{ value: "% of Capacity", angle: -90, position: "left" }}
-                        domain={([dataMin, dataMax]) => [Math.floor(dataMin*10)/10, Math.ceil(dataMax*10)/10]}
+                        domain={([dataMin, dataMax]) =>
+                            [Math.floor(dataMin*20)/20, Math.min(Math.ceil(dataMax*20)/20, Math.ceil(dataMax*100)/100)]}
+                        minTickGap={0.05}
                         allowDecimals={true}
                         tickFormatter={val => toPercentString(val)} />
                     <Tooltip

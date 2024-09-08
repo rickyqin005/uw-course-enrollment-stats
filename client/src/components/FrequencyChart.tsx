@@ -8,7 +8,9 @@ const moment = require('moment');
 const { firstWeek, lastWeek } = require('../consts.json');
 let currWeek = moment(firstWeek);
 const weeksList: ValueAndLabel<string>[] = [];
+let defaultWeekSelectedIndex = -1;
 while(currWeek.isSameOrBefore(moment(lastWeek))) {
+    if(currWeek <= moment()) defaultWeekSelectedIndex = weeksList.length;
     weeksList.push({
         value: currWeek.toISOString(),
         label: currWeek.format('MMM D')
@@ -28,7 +30,7 @@ interface TimeFrame {
 export default function FrequencyChart({ courseOptions, components }: { courseOptions: CourseOptions, components: string[] }) {
     const [chartSubjectsSelected, setChartSubjectsSelected] = React.useState<string[]>([]);
     const [chartComponentsSelected, setChartComponentsSelected] = React.useState<string[]>([]);
-    const [chartWeekSelected, setChartWeekSelected] = React.useState<ValueAndLabel<string>>(weeksList[1]);
+    const [chartWeekSelected, setChartWeekSelected] = React.useState<ValueAndLabel<string>>(weeksList[defaultWeekSelectedIndex]);
 
     const { data, dataIsLoaded } = useAPI<TimeFrame[]>('/api/chart1', {
         subjects: chartSubjectsSelected,

@@ -1,7 +1,9 @@
 {
-    "firstWeek": "1900-09-02",
-    "lastWeek": "1900-12-02",
+    "firstWeek": "2024-08-26",
+    "lastWeek": "2024-12-02",
     "defaultWeekIndex": 1,
+    "firstDayOfClass": "2024-09-04",
+    "lastDayOfClass": "2024-12-03",
     "defaultCourseOptions": {
         "subjects": [
             {

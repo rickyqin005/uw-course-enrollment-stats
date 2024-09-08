@@ -96,8 +96,8 @@ async function refresh() {
                         let startDate: Date | null = null;
                         let endDate: Date | null = null;
                         if(dateStr != '') {
-                            startDate = new Date(Date.UTC(0, parseInt(dateStr.slice(0,2))-1, parseInt(dateStr.slice(3,5))));
-                            endDate = new Date(Date.UTC(0, parseInt(dateStr.slice(6,8))-1, parseInt(dateStr.slice(9,11))));
+                            startDate = new Date(Date.UTC(2024, parseInt(dateStr.slice(0,2))-1, parseInt(dateStr.slice(3,5))));
+                            endDate = new Date(Date.UTC(2024, parseInt(dateStr.slice(6,8))-1, parseInt(dateStr.slice(9,11))));
                         }
 
                         if(!isNaN(code)) {
