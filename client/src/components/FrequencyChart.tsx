@@ -8,7 +8,7 @@ const moment = require('moment');
 const { firstWeek, lastWeek } = require('../consts.json');
 let currWeek = moment(firstWeek);
 const weeksList: ValueAndLabel<string>[] = [];
-let defaultWeekSelectedIndex = -1;
+let defaultWeekSelectedIndex = 0;
 while(currWeek.isSameOrBefore(moment(lastWeek))) {
     if(currWeek <= moment()) defaultWeekSelectedIndex = weeksList.length;
     weeksList.push({

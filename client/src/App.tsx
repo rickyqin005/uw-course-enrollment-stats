@@ -5,6 +5,7 @@ import CoursesTable from "./components/CoursesTable.tsx";
 import EnrollmentChart from "./components/EnrollmentChart.tsx";
 import { CourseOptions, CourseOptionsRaw, EnrollmentChartState } from "./components/types.ts";
 import useAPI from "./hooks/useAPI.ts";
+import SectionSizeChart from "./components/SectionSizeChart.tsx";
 
 const consts = require('./consts.json');
 const components = consts.components;
@@ -35,6 +36,7 @@ export default function App() {
 				<EnrollmentChart state={enrollmentChartState} />
 				<CoursesTable enrollmentChartState={enrollmentChartState} />
 				<FrequencyChart courseOptions={data} components={components} />
+				<SectionSizeChart />
 			</div>
 			<div className="App-footer">
 				Made by Ricky Qin, check out my other projects <a href="https://github.com/rickyqin005">here</a>!

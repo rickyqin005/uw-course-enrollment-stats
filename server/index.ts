@@ -77,7 +77,8 @@ app.get('/api/check', (req, res) => {
             component: staticData.defaultComponentSelected
         },
         toSQLParams: params => params
-    }
+    },
+    { path: '/api/chart4' }
 ].forEach(route => {
     app.get(route.path, async (req, res) => {
         try {
