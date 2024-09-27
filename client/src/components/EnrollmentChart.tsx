@@ -60,10 +60,12 @@ export default function EnrollmentChart({ state }: { state: EnrollmentChartState
                 }) ?? []))
             }});
 
-            // lengthen timeseries to end of current month
+            // lengthen timeseries to end of current month or t+14 days
             if(data.length > 0) {
-                const endOfMonth = moment.utc().endOf('month').startOf('day');
-                const lastDay = moment.min(endOfMonth, moment.utc(consts.lastDayOfClass));
+                const lastDay = moment.min(
+                    moment.max(moment.utc().endOf('month').startOf('day'), moment.utc().startOf('day').add(14, 'days')),
+                    moment.utc(consts.lastDayOfClass));
+                
                 let currDay = moment.utc(data.at(-1).name).add(1, 'days');
 
                 while(currDay.isSameOrBefore(lastDay)) {
